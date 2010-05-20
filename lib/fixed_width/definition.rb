@@ -2,7 +2,7 @@ class FixedWidth
   class Definition
     attr_reader :sections, :templates, :options
 
-    def initialize(options = {})
+    def initialize(options={})
       @sections = []
       @templates = {}
       @options = { :align => :right }.merge(options)
@@ -20,7 +20,7 @@ class FixedWidth
       section
     end
 
-    def template(name, options = {}, &block)
+    def template(name, options={}, &block)
       section = FixedWidth::Section.new(name, @options.merge(options))
       yield(section)
       @templates[name] = section

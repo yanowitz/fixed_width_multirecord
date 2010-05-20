@@ -33,7 +33,7 @@ class FixedWidth
     def template(name)
       template = @definition.templates[name]
       raise ArgumentError, "Template #{name} not found as a known template." unless template
-      @columns = @columns + template.columns
+      @columns += template.columns
       # Section options should trump template options
       @options = template.options.merge(@options)
     end
@@ -42,12 +42,7 @@ class FixedWidth
       # raise( ColumnMismatchError,
       #   "The '#{@name}' section has #{@columns.size} column(s) defined, but there are #{data.size} column(s) provided in the data."
       # ) unless @columns.size == data.size
-      row = ''
-
-      @columns.each do |column|
-        row += column.format(data[column.name])
-      end
-      row
+      @columns.map{|column| column.format(data[column.name]) }.join
     end
 
     def parse(line)

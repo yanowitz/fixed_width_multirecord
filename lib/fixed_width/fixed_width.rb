@@ -25,7 +25,7 @@ class FixedWidth
 
   def self.write(filename, definition_name, data)
     File.open(filename, 'w') do |f|
-      f.write generate(definition_name, data)
+      f.write(generate(definition_name, data))
     end
   end
 
