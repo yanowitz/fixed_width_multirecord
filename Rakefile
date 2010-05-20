@@ -1,37 +1,44 @@
-require 'rake'
-require 'spec/rake/spectask'
+task :default => :spec
+task :test    => :spec
 
-desc "Run all examples with RCov"
-Spec::Rake::SpecTask.new('rcov') do |t|
-  t.spec_files = FileList['spec/*.rb']
-  t.rcov = true
-  t.rcov_opts = ['--exclude', 'spec']
+desc "Build a gem"
+task :gem => [ :gemspec, :build ]
+
+desc "Run specs"
+task :spec do
+  exec "spec spec/"
 end
 
 begin
-  require 'bones'
-  Bones.setup
+  require 'jeweler'
+  Jeweler::Tasks.new do |gemspec|
+    gemspec.name = "fixed_width"
+    gemspec.summary = "A gem that provides a DSL for parsing and writing files of fixed-width records."
+    gemspec.description = <<END
+Shamelessly forked from ryanwood/slither [http://github.com/ryanwood/slither].
+
+Renamed the gem to be a little clearer as to its purpose. Hate that 'nokogiri' nonsense.
+END
+    gemspec.email = "timon.karnezos@gmail.com"
+    gemspec.homepage = "http://github.com/timonk/fixed_width"
+    gemspec.authors = ["Timon Karnezos"]
+  end
 rescue LoadError
-  load 'tasks/setup.rb'
+  warn "Jeweler not available. Install it with:"
+  warn "gem install jeweler"
 end
 
-ensure_in_path 'lib'
-require 'bones'
+require 'rake/rdoctask'
+Rake::RDocTask.new do |rdoc|
+  if File.exist?('VERSION')
+    version = File.read('VERSION')
+  else
+    version = ""
+  end
 
-task :default => 'spec:run'
-
-PROJ.name = 'slither'
-PROJ.authors = 'Ryan Wood'
-PROJ.email = 'ryan.wood@gmail.com'
-PROJ.url = 'http://github.com/ryanwood/slither'
-PROJ.version = '0.99.3'
-PROJ.exclude = %w(\.git .gitignore ^tasks \.eprj ^pkg)
-PROJ.readme_file = 'README.rdoc'
-
-#PROJ.rubyforge.name = 'codeforpeople'
-
-PROJ.rdoc.exclude << '^data'
-PROJ.notes.exclude = %w(^README\.rdoc$ ^data ^pkg)
-
-# PROJ.svn.path = 'bones'
-# PROJ.spec.opts << '--color'
+  rdoc.rdoc_dir = 'rdoc'
+  rdoc.title = "rprince #{version}"
+  rdoc.options << '--line-numbers' << '--inline-source'
+  rdoc.rdoc_files.include('README*')
+  rdoc.rdoc_files.include('lib/**/*.rb')
+end
