@@ -70,7 +70,7 @@ class FixedWidth
     private
 
     def unpacker
-      @columns.map { |c| c.unpacker }.join('')
+      @columns.map(&:unpacker).join
     end
   end
 end

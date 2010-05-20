@@ -17,15 +17,11 @@ describe FixedWidth::Column do
     end
 
     it "should have a default padding" do
-      @column.padding.should == :space
+      @column.padding.should == ' '
     end
 
     it "should have a default alignment" do
       @column.alignment.should == :right
-    end
-
-    it "should return a proper formatter" do
-      @column.send(:formatter).should == "%5s"
     end
   end
 
@@ -45,15 +41,15 @@ describe FixedWidth::Column do
 
   describe "when specifying padding" do
     before(:each) do
-      @column = FixedWidth::Column.new(@name, @length, :padding => :zero)
+      @column = FixedWidth::Column.new(@name, @length, :padding => '0')
     end
-
-    it "should accept only :space or :zero" do
-      lambda{ FixedWidth::Column.new(@name, @length, :padding => :bogus) }.should raise_error(ArgumentError, "Option :padding only accepts :space (default) or :zero")
+    
+    it "should check the length of the padding and warn" do
+      pending
     end
 
     it "should override the default padding" do
-      @column.padding.should == :zero
+      @column.padding.should == '0'
     end
   end
 
@@ -63,6 +59,7 @@ describe FixedWidth::Column do
 
   describe "when parsing a value from a file" do
     it "should default to a string" do
+      pending("need to split into l and r aligned")
       @column.parse('    name ').should == 'name'
       @column.parse('      234').should == '234'
       @column.parse('000000234').should == '000000234'
@@ -88,11 +85,6 @@ describe FixedWidth::Column do
       @column.parse('00023.45').should == 23.45
     end
 
-    it "should support the money_with_implied_decimal type" do
-      @column = FixedWidth::Column.new(:amount, 10, :type=> :money_with_implied_decimal)
-      @column.parse('   23445').should == 234.45
-    end
-
     it "should support the date type" do
       @column = FixedWidth::Column.new(:date, 10, :type => :date)
       dt = @column.parse('2009-08-22')
@@ -101,7 +93,7 @@ describe FixedWidth::Column do
     end
 
     it "should use the format option with date type if available" do
-      @column = FixedWidth::Column.new(:date, 10, :type => :date, :format => "%m%d%Y")
+      @column = FixedWidth::Column.new(:date, 10, :type => :date, :date_format => "%m%d%Y")
       dt = @column.parse('08222009')
       dt.should be_a(Date)
       dt.to_s.should == '2009-08-22'
@@ -109,11 +101,6 @@ describe FixedWidth::Column do
   end
 
   describe "when applying formatting options" do
-    it "should return a proper formatter" do
-      @column = FixedWidth::Column.new(@name, @length, :align => :left)
-      @column.send(:formatter).should == "%-5s"
-    end
-
     it "should respect a right alignment" do
       @column = FixedWidth::Column.new(@name, @length, :align => :right)
       @column.format(25).should == '   25'
@@ -125,23 +112,23 @@ describe FixedWidth::Column do
     end
 
     it "should respect padding with spaces" do
-      @column = FixedWidth::Column.new(@name, @length, :padding => :space)
+      @column = FixedWidth::Column.new(@name, @length, :padding => ' ')
       @column.format(25).should == '   25'
     end
 
     it "should respect padding with zeros with integer types" do
-      @column = FixedWidth::Column.new(@name, @length, :type => :integer, :padding => :zero)
+      @column = FixedWidth::Column.new(@name, @length, :type => :integer, :padding => '0')
       @column.format(25).should == '00025'
     end
 
     describe "that is a float type" do
       it "should respect padding with zeros aligned right" do
-        @column = FixedWidth::Column.new(@name, @length, :type => :float, :padding => :zero, :align => :right)
+        @column = FixedWidth::Column.new(@name, @length, :type => :float, :padding => '0', :align => :right)
         @column.format(4.45).should == '04.45'
       end
 
       it "should respect padding with zeros aligned left" do
-        @column = FixedWidth::Column.new(@name, @length, :type => :float, :padding => :zero, :align => :left)
+        @column = FixedWidth::Column.new(@name, @length, :type => :float, :padding => '0', :align => :left)
         @column.format(4.45).should == '4.450'
       end
     end
@@ -187,27 +174,21 @@ describe FixedWidth::Column do
     end
 
     it "should support the float type with a format" do
-      @column = FixedWidth::Column.new(:amount, 10, :type => :float, :format => "%.3f")
+      @column = FixedWidth::Column.new(:amount, 10, :type => :float, :float_format => "%.3f")
       @column.format(234.45).should       == '   234.450'
       @column.format('234.4500').should   == '   234.450'
       @column.format('3').should          == '     3.000'
     end
 
     it "should support the float type with a format, alignment and padding" do
-      @column = FixedWidth::Column.new(:amount, 10, :type => :float, :format => "%.2f", :align => :left, :padding => :zero)
+      @column = FixedWidth::Column.new(:amount, 10, :type => :float, :float_format => "%.2f", :align => :left, :padding => '0')
       @column.format(234.45).should       == '234.450000'
-      @column = FixedWidth::Column.new(:amount, 10, :type => :float, :format => "%.2f", :align => :right, :padding => :zero)
+      @column = FixedWidth::Column.new(:amount, 10, :type => :float, :float_format => "%.2f", :align => :right, :padding => '0')
       @column.format('234.400').should    == '0000234.40'
-      @column = FixedWidth::Column.new(:amount, 10, :type => :float, :format => "%.4f", :align => :left, :padding => :space)
+      @column = FixedWidth::Column.new(:amount, 10, :type => :float, :float_format => "%.4f", :align => :left, :padding => ' ')
       @column.format('3').should          == '3.0000    '
     end
-
-    it "should support the money_with_implied_decimal type" do
-      @column = FixedWidth::Column.new(:amount, 10, :type=> :money_with_implied_decimal)
-      @column.format(234.450).should   == "     23445"
-      @column.format(12.34).should     == "      1234"
-    end
-
+    
     it "should support the date type" do
       dt = Date.new(2009, 8, 22)
       @column = FixedWidth::Column.new(:date, 10, :type => :date)
@@ -216,7 +197,7 @@ describe FixedWidth::Column do
 
     it "should support the date type with a :format" do
       dt = Date.new(2009, 8, 22)
-      @column = FixedWidth::Column.new(:date, 8, :type => :date, :format => "%m%d%Y")
+      @column = FixedWidth::Column.new(:date, 8, :type => :date, :date_format => "%m%d%Y")
       @column.format(dt).should == '08222009'
     end 
   end
