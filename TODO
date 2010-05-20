@@ -1,13 +1,7 @@
-== 0.99.2
-
 * Add :limit option on sections
 * Add :validation option for columns
 * Add a validate_file() method to parse a file and run all validation tests (implies validation implemented)
-
-== 1.0.0
-
 * Better Documentation
-
-== 1.x
-
 * Alternate Section Flow (other than linear), i.e. repeatable sections (think batch)
+* Add batched generation, so we don't turn into memory hogs
+* Add batched parsing, so we don't turn into memory hogs
