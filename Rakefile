@@ -6,7 +6,7 @@ task :gem => [ :gemspec, :build ]
 
 desc "Run specs"
 task :spec do
-  exec "spec spec/"
+  exec "spec -fn -b -c spec/"
 end
 
 begin

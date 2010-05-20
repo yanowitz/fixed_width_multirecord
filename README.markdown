@@ -32,7 +32,7 @@ SYNOPSIS:
 
       d.body do |body|
         body.trap { |line| line[0,4] =~ /[^(HEAD|FOOT)]/ }
-        body.column :id, 10, :type => :integer
+        body.column :id, 10, :parser => :to_i
         body.column :name, 10, :align => :left
         body.spacer 3
         body.column :state, 2
@@ -45,14 +45,7 @@ SYNOPSIS:
       end
     end
 
-Supported types are:
-
-* `:string`,
-* `:integer`,
-* `:date`,
-* `:float`,
-* `:money`, and
-* `:money_with_implied_decimal`.
+`:parser` and `:formatter` options are symbols (to be proc-ified) or procs. By default, parsing and formatting assume that we're expecting/writing right-aligned strings, padded with spaces.
 
 Then either feed it a nested struct with data values to create the file in the defined format:
 

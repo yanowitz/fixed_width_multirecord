@@ -2,55 +2,48 @@ require 'date'
 
 class FixedWidth
   class ParserError < RuntimeError; end
-  DEFAULT_PADDING = ' '
-
   class Column
-    attr_reader :name, :length, :alignment, :type, :padding, :unpacker
+    DEFAULT_PADDING   = ' '
+    DEFAULT_ALIGNMENT = :right
+    DEFAULT_TRUNCATE  = false
+    DEFAULT_FORMATTER = :to_s
+
+    attr_reader :name, :length, :alignment, :type, :padding, :truncate, :unpacker
 
     def initialize(name, length, options = {})
       assert_valid_options(options)
-      @name          = name
-      @length        = length
+      @name      = name
+      @length    = length
+      @alignment = options[:align]    || DEFAULT_ALIGNMENT
+      @padding   = options[:padding]  || DEFAULT_PADDING
+      @truncate  = options[:truncate] || DEFAULT_TRUNCATE
 
-      @unpacker      = "A#{@length}"
+      @unpacker  = "A#{@length}"
 
-      @alignment     = options[:align]    || :right
-      @type          = options[:type]     || :string
-      @padding       = options[:padding]  || DEFAULT_PADDING
-      @truncate      = options[:truncate] || false
+      @parser    = options[:parser]
+      @parser    ||= case @alignment
+                 when :right then :lstrip
+                 when :left  then :rstrip
+                 end
+      @parser    = @parser.to_proc if @parser.is_a?(Symbol)
 
-      # applies for parsing/writing :date
-      @date_format  = options[:date_format]
-      # applies for writing :float
-      @float_format = options[:float_format]
+      @formatter = options[:formatter]
+      @formatter ||= DEFAULT_FORMATTER
+      @formatter = @formatter.to_proc if @formatter.is_a?(Symbol)
     end
 
     def parse(value)
-      case @type
-      when :integer
-        value.to_i
-      when :float
-        value.to_f
-      when :date
-        if @date_format
-          Date.strptime(value, @date_format)
-        else
-          Date.strptime(value)
-        end
-      when :string
-        case @alignment
-        when :left  then value.lstrip
-        when :right then value.rstrip
-        end
-      else
-        raise "Undefined type #{@type} for column #{@name}!"
-      end
+      @parser.call(value)
     rescue
-      raise ParserError, "The value '#{value}' could not be converted to type #{@type}: #{$!}"
+      raise ParserError, "The value '#{value}' could not be parsed: #{$!}"
     end
 
     def format(value)
-      pad(to_s(value))
+      pad(
+        validate_size(
+          @formatter.call(value)
+        )
+      )
     end
 
     private
@@ -62,30 +55,6 @@ class FixedWidth
       when :right
         value.rjust(@length, @padding)
       end
-    end
-
-    def to_s(value)
-      result = case @type
-      when :date
-        if value.respond_to?(:strftime)
-          if @date_format
-            value.strftime(@date_format)
-          else
-            value.strftime
-          end
-        else
-          value.to_s
-        end
-      when :float
-        if @float_format
-          @float_format % value.to_f
-        else
-          value.to_f.to_s # minimal precision needed to render fully.
-        end
-      else
-        value.to_s
-      end
-      validate_size(result)
     end
 
     def assert_valid_options(options)
