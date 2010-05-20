@@ -1,14 +1,13 @@
-require 'date'
-
 class FixedWidth
   class ParserError < RuntimeError; end
+
   class Column
     DEFAULT_PADDING   = ' '
     DEFAULT_ALIGNMENT = :right
     DEFAULT_TRUNCATE  = false
     DEFAULT_FORMATTER = :to_s
 
-    attr_reader :name, :length, :alignment, :type, :padding, :truncate, :unpacker
+    attr_reader :name, :length, :alignment, :padding, :truncate, :unpacker
 
     def initialize(name, length, options = {})
       assert_valid_options(options)
