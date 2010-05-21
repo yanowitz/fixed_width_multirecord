@@ -8,10 +8,8 @@ class FixedWidth
       @options = { :align => :right }.merge(options)
     end
 
-    def section(name, options = {}, &block)
-      raise( ArgumentError, "Reserved or duplicate section name: '#{name}'") if
-      Section::RESERVED_NAMES.include?( name ) || 
-      (@sections.size > 0 && @sections.map{ |s| s.name }.include?( name ))
+    def section(name, options={}, &block)
+      raise ArgumentError.new("Duplicate section name: '#{name}'") if @sections.detect{|s| s.name == name }
 
       section = FixedWidth::Section.new(name, @options.merge(options))
       section.definition = self

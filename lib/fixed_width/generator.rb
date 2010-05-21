@@ -9,15 +9,8 @@ class FixedWidth
       @builder = []
       @definition.sections.each do |section|
         content = data[section.name]
-        if content
-          content = [content] unless content.is_a?(Array)
-          raise(FixedWidth::RequiredSectionEmptyError, "Required section '#{section.name}' was empty.") if content.empty?
-          content.each do |row|
-            @builder << section.format(row)
-          end
-        else
-          raise(FixedWidth::RequiredSectionEmptyError, "Required section '#{section.name}' was empty.") unless section.optional
-        end
+        raise FixedWidth::RequiredSectionEmptyError.new("Required section '#{section.name}' was empty.") if (content.nil? || content.empty?) && !section.optional
+        Array(content).each {|row| @builder << section.format(row) }
       end
       @builder.join("\n")
     end

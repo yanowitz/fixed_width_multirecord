@@ -8,8 +8,8 @@ describe FixedWidth::Parser do
     @parser = FixedWidth::Parser.new(@definition, @file_name)
   end
 
-  it "should open and yield the source file" do
-    File.should_receive(:open).with(@file_name, 'r').and_yield(@file)
+  it "should read in a source file" do
+    File.should_receive(:readlines).with(@file_name).and_return([""])
     @parser.parse
   end
 
@@ -32,18 +32,16 @@ describe FixedWidth::Parser do
           f.column :file_id, 10
         end
       end
-      File.should_receive(:open).with(@file_name, 'r').and_yield(@file)
       @parser = FixedWidth::Parser.new(@definition, @file_name)
     end
 
     it "should add lines to the proper sections" do
-      @file.should_receive(:gets).exactly(4).times.and_return(
+      File.should_receive(:readlines).with(@file_name).and_return([
         'HEAD         1',
         '      Paul    Hewson',
         '      Dave     Evans',
-        'FOOT         1',
-        nil
-      )
+        'FOOT         1'
+      ])
       expected = {
         :header => [ {:type => "HEAD", :file_id => "1" }],
         :body => [ 
@@ -59,16 +57,18 @@ describe FixedWidth::Parser do
     it "should allow optional sections to be skipped" do
       @definition.sections[0].optional = true
       @definition.sections[2].optional = true
-      @file.should_receive(:gets).twice.and_return('      Paul    Hewson', nil)
+      File.should_receive(:readlines).with(@file_name).and_return([
+        '      Paul    Hewson'
+      ])
       expected = { :body => [ {:first => "Paul", :last => "Hewson" } ] }
       @parser.parse.should == expected
     end
 
     it "should raise an error if a required section is not found" do
-      @file.should_receive(:gets).twice.and_return('      Ryan      Wood', nil)
+      File.should_receive(:readlines).with(@file_name).and_return([
+        '      Ryan      Wood'
+      ])
       lambda { @parser.parse }.should raise_error(FixedWidth::RequiredSectionNotFoundError, "Required section 'header' was not found.")
     end
-
-    # it "raise an error if a section limit is over run"
   end
 end

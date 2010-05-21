@@ -3,27 +3,25 @@ class FixedWidth
     attr_accessor :definition, :optional
     attr_reader :name, :columns, :options
 
-    RESERVED_NAMES = [:spacer]
-
-    def initialize(name, options = {})
-      @name = name
-      @options = options
-      @columns = []
-      @trap = options[:trap]
+    def initialize(name, options={})
+      @name     = name
+      @options  = options
+      @columns  = []
+      @trap     = options[:trap]
       @optional = options[:optional] || false
     end
 
-    def column(name, length, options = {})
-      raise(FixedWidth::DuplicateColumnNameError, "You have already defined a column named '#{name}'.") if @columns.map do |c|
-        RESERVED_NAMES.include?(c.name) ? nil : c.name
-      end.flatten.include?(name)
+    def column(name, length, options={})
+      raise FixedWidth::DuplicateColumnNameError.new("You have already defined a column named '#{name}'.") if (@columns.map(&:name) - [:spacer]).include?(name)
       col = Column.new(name, length, @options.merge(options))
       @columns << col
       col
     end
 
-    def spacer(length)
-      column(:spacer, length)
+    def spacer(length, spacer=nil)
+      options           = {}
+      options[:padding] = spacer if spacer
+      column(:spacer, length, options)
     end
 
     def trap(&block)
@@ -39,9 +37,6 @@ class FixedWidth
     end
 
     def format(data)
-      # raise( ColumnMismatchError,
-      #   "The '#{@name}' section has #{@columns.size} column(s) defined, but there are #{data.size} column(s) provided in the data."
-      # ) unless @columns.size == data.size
       @columns.map{|column| column.format(data[column.name]) }.join
     end
 
@@ -49,7 +44,7 @@ class FixedWidth
       line_data = line.unpack(unpacker)
       row = {}
       @columns.each_with_index do |c, i|
-        row[c.name] = c.parse(line_data[i]) unless RESERVED_NAMES.include?(c.name)
+        row[c.name] = c.parse(line_data[i]) unless c.name == :spacer
       end
       row
     end
@@ -65,7 +60,7 @@ class FixedWidth
     private
 
     def unpacker
-      @columns.map(&:unpacker).join
+      @unpacker ||= @columns.map(&:unpacker).join
     end
   end
 end

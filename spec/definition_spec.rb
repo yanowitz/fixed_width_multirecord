@@ -46,11 +46,7 @@ describe FixedWidth::Definition do
 
     it "should not create duplicate section names" do
       lambda { @d.section(:header) {} }.should_not raise_error(ArgumentError)
-      lambda { @d.section(:header) {} }.should raise_error(ArgumentError, "Reserved or duplicate section name: 'header'")
-    end
-
-    it "should throw an error if a reserved section name is used" do
-      lambda { @d.section(:spacer) {} }.should raise_error(ArgumentError, "Reserved or duplicate section name: 'spacer'")
+      lambda { @d.section(:header) {} }.should raise_error(ArgumentError, "Duplicate section name: 'header'")
     end
   end
 

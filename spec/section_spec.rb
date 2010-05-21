@@ -9,10 +9,6 @@ describe FixedWidth::Section do
     @section.columns.should be_empty
   end
 
-  it "should know it's reserved names" do
-    FixedWidth::Section::RESERVED_NAMES.should == [:spacer]
-  end
-
   describe "when adding columns" do
     it "should build an ordered column list" do
       @section.should have(0).columns
@@ -104,14 +100,6 @@ describe FixedWidth::Section do
       @section.column(:name, 10, :align => :left)
       @section.format(@data).should == "    3Ryan      "
     end
-
-    # it "should raise an error if the data and column definitions aren't the same size" do
-    #   @section.column(:id, 5)
-    #   lambda { @section.format(@data) }.should raise_error(
-    #     FixedWidth::ColumnMismatchError,
-    #     "The 'body' section has 1 column(s) defined, but there are 2 column(s) provided in the data."
-    #   )
-    # end
   end
 
   describe "when parsing a file" do
