@@ -32,7 +32,7 @@ class FixedWidth
     def parse(value)
       @parser.call(value)
     rescue
-      raise ParserError, "The value '#{value}' could not be parsed: #{$!}"
+      raise ParserError.new("The value '#{value}' could not be parsed: #{$!}")
     end
 
     def format(value)
@@ -56,14 +56,14 @@ class FixedWidth
 
     def assert_valid_options(options)
       unless options[:align].nil? || [:left, :right].include?(options[:align])
-        raise ArgumentError, "Option :align only accepts :right (default) or :left"
+        raise ArgumentError.new("Option :align only accepts :right (default) or :left")
       end
     end
 
     def validate_size(result)
       return result if result.length <= @length
-      raise FixedWidth::FormattedStringExceedsLengthError,
-        "The formatted value '#{result}' in column '#{@name}' exceeds the allowed length of #{@length} chararacters." unless @truncate
+      raise FixedWidth::FormattedStringExceedsLengthError.new(
+        "The formatted value '#{result}' in column '#{@name}' exceeds the allowed length of #{@length} chararacters.") unless @truncate
       case @alignment
       when :right then result[-@length,@length]
       when :left  then result[0,@length]

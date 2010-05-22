@@ -18,7 +18,7 @@ class FixedWidth
 
   def self.generate(definition_name, data)
     definition = definition(definition_name)
-    raise ArgumentError, "Definition name '#{name}' was not found." unless definition
+    raise ArgumentError.new("Definition name '#{name}' was not found.") unless definition
     generator = Generator.new(definition)
     generator.generate(data)
   end
@@ -30,9 +30,9 @@ class FixedWidth
   end
 
   def self.parse(filename, definition_name)
-    raise ArgumentError, "File #{filename} does not exist." unless File.exists?(filename)
+    raise ArgumentError.new("File #{filename} does not exist.") unless File.exists?(filename)
     definition = definition(definition_name)
-    raise ArgumentError, "Definition name '#{definition_name}' was not found." unless definition
+    raise ArgumentError.new("Definition name '#{definition_name}' was not found.") unless definition
     parser = Parser.new(definition, filename)
     parser.parse
   end

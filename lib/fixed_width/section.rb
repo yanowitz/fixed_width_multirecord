@@ -30,7 +30,7 @@ class FixedWidth
 
     def template(name)
       template = @definition.templates[name]
-      raise ArgumentError, "Template #{name} not found as a known template." unless template
+      raise ArgumentError.new("Template '#{name}' not found as a known template.") unless template
       @columns += template.columns
       # Section options should trump template options
       @options = template.options.merge(@options)

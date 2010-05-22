@@ -42,7 +42,7 @@ describe FixedWidth::Section do
 
     it "should prevent duplicate column names" do
       @section.column :id, 10
-      lambda { @section.column(:id, 30) }.should raise_error(FixedWidth::DuplicateColumnNameError, "You have already defined a column named 'id'.")
+      lambda { @section.column(:id, 30) }.should raise_error(FixedWidth::DuplicateColumnNameError, /column named 'id'/)
     end
 
     it "should allow duplicate column names that are reserved (i.e. spacer)" do
