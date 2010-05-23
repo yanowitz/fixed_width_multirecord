@@ -20,7 +20,7 @@ describe FixedWidth::Generator do
       end
     end
     @data = {
-      :header => [ {:type => "HEAD", :file_id => "1" }],
+      :header => [ {:type => "HEAD", :file_id => "1" } ],
       :body => [ 
         {:first => "Paul", :last => "Hewson" },
         {:first => "Dave", :last => "Evans" }
@@ -37,6 +37,12 @@ describe FixedWidth::Generator do
 
   it "should generate a string" do
     expected = "HEAD         1\n      Paul    Hewson\n      Dave     Evans\nFOOT         1"
+    @generator.generate(@data).should == expected
+  end
+  
+  it "should handle lazy data declaration (no array around single record for a section)" do
+    expected = "HEAD         1\n      Paul    Hewson\n      Dave     Evans\nFOOT         1"
+    @data[:header] = @data[:header].first
     @generator.generate(@data).should == expected
   end
 end

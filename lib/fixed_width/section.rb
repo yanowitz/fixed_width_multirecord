@@ -43,7 +43,10 @@ class FixedWidth
     end
 
     def format(data)
-      @columns.map{|column| column.format(data[column.name]) }.join
+      @columns.map do |c|
+        hash = c.group ? data[c.group] : data
+        c.format(hash[c.name])
+      end.join
     end
 
     def parse(line)

@@ -115,6 +115,13 @@ describe FixedWidth::Section do
       @section.column(:name, 10, :align => :left)
       @section.format(@data).should == "    3Ryan      "
     end
+
+    it "should read from groups" do
+      @data = { :id => 3, :foo => { :name => "Ryan" } }
+      @section.column(:id, 5)
+      @section.column(:name, 10, :align => :left, :group => :foo)
+      @section.format(@data).should == "    3Ryan      "
+    end
   end
 
   describe "when parsing a file" do
