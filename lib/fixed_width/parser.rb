@@ -20,7 +20,7 @@ class FixedWidth
     private
 
     def read_file
-      File.readlines(@file).map(&:chomp)
+      @file.readlines.map(&:chomp)
     end
 
     def fill_content(section)

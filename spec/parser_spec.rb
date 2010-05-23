@@ -3,13 +3,12 @@ require File.join(File.dirname(__FILE__), 'spec_helper')
 describe FixedWidth::Parser do
   before(:each) do
     @definition = mock('definition', :sections => [])
-    @file = mock("file", :gets => nil)
-    @file_name = 'test.txt'
-    @parser = FixedWidth::Parser.new(@definition, @file_name)
+    @file = mock("file")
+    @parser = FixedWidth::Parser.new(@definition, @file)
   end
 
   it "should read in a source file" do
-    File.should_receive(:readlines).with(@file_name).and_return([""])
+    @file.should_receive(:readlines).and_return(["\n"])
     @parser.parse
   end
 
@@ -32,15 +31,15 @@ describe FixedWidth::Parser do
           f.column :file_id, 10
         end
       end
-      @parser = FixedWidth::Parser.new(@definition, @file_name)
+      @parser = FixedWidth::Parser.new(@definition, @file)
     end
 
     it "should add lines to the proper sections" do
-      File.should_receive(:readlines).with(@file_name).and_return([
-        'HEAD         1',
-        '      Paul    Hewson',
-        '      Dave     Evans',
-        'FOOT         1'
+      @file.should_receive(:readlines).and_return([
+        "HEAD         1\n",
+        "      Paul    Hewson\n",
+        "      Dave     Evans\n",
+        "FOOT         1\n"
       ])
       expected = {
         :header => [ {:type => "HEAD", :file_id => "1" }],
@@ -57,16 +56,16 @@ describe FixedWidth::Parser do
     it "should allow optional sections to be skipped" do
       @definition.sections[0].optional = true
       @definition.sections[2].optional = true
-      File.should_receive(:readlines).with(@file_name).and_return([
-        '      Paul    Hewson'
+      @file.should_receive(:readlines).and_return([
+        "      Paul    Hewson\n"
       ])
       expected = { :body => [ {:first => "Paul", :last => "Hewson" } ] }
       @parser.parse.should == expected
     end
 
     it "should raise an error if a required section is not found" do
-      File.should_receive(:readlines).with(@file_name).and_return([
-        '      Ryan      Wood'
+      @file.should_receive(:readlines).and_return([
+        "      Ryan      Wood\n"
       ])
       lambda { @parser.parse }.should raise_error(FixedWidth::RequiredSectionNotFoundError, "Required section 'header' was not found.")
     end

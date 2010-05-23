@@ -51,34 +51,31 @@ describe FixedWidth do
       file = mock('file')
       text = mock('string')
       file.should_receive(:write).with(text)
-      File.should_receive(:open).with('file.txt', 'w').and_yield(file)
       FixedWidth.should_receive(:generate).with(:test, {}).and_return(text)
-      FixedWidth.write('file.txt', :test, {})
+      FixedWidth.write(file, :test, {})
     end
   end
 
   describe "when parsing a file" do
     before(:each) do
-      @file_name = 'file.txt'
+      @file = mock('file')
     end
 
     it "should check the file exists" do
-      lambda { FixedWidth.parse(@file_name, :test, {}) }.should raise_error(ArgumentError)
+      lambda { FixedWidth.parse(@file, :test, {}) }.should raise_error(ArgumentError)
     end
 
     it "should raise an error if the definition name is not found" do
       FixedWidth.definitions.clear
-      File.stub!(:exists? => true)
-      lambda { FixedWidth.parse(@file_name, :test, {}) }.should raise_error(ArgumentError)
+      lambda { FixedWidth.parse(@file, :test, {}) }.should raise_error(ArgumentError)
     end
 
     it "should create a parser and call parse" do
-      File.stub!(:exists? => true)
       parser = mock("parser", :null_object => true)
       definition = mock('definition')
       FixedWidth.should_receive(:definition).with(:test).and_return(definition)
-      FixedWidth::Parser.should_receive(:new).with(definition, @file_name).and_return(parser)
-      FixedWidth.parse(@file_name, :test)
+      FixedWidth::Parser.should_receive(:new).with(definition, @file).and_return(parser)
+      FixedWidth.parse(@file, :test)
     end
   end
 end
