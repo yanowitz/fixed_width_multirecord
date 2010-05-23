@@ -27,6 +27,7 @@ Renamed the gem to be a little clearer as to its purpose. Hate that 'nokogiri' n
      "Rakefile",
      "TODO",
      "VERSION",
+     "fixed_width.gemspec",
      "lib/fixed_width.rb",
      "lib/fixed_width/column.rb",
      "lib/fixed_width/core_ext/symbol.rb",
