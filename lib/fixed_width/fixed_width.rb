@@ -4,6 +4,7 @@ class FixedWidth
   
   class ParserError < RuntimeError; end
   class DuplicateColumnNameError < StandardError; end
+  class DuplicateGroupNameError < StandardError; end
   class RequiredSectionNotFoundError < StandardError; end
   class RequiredSectionEmptyError < StandardError; end
   class FormattedStringExceedsLengthError < StandardError; end

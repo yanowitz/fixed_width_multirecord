@@ -5,15 +5,17 @@ class FixedWidth
     DEFAULT_TRUNCATE  = false
     DEFAULT_FORMATTER = :to_s
 
-    attr_reader :name, :length, :alignment, :padding, :truncate, :unpacker
+    attr_reader :name, :length, :alignment, :padding, :truncate, :group, :unpacker
 
-    def initialize(name, length, options = {})
+    def initialize(name, length, options={})
       assert_valid_options(options)
       @name      = name
       @length    = length
       @alignment = options[:align]    || DEFAULT_ALIGNMENT
       @padding   = options[:padding]  || DEFAULT_PADDING
       @truncate  = options[:truncate] || DEFAULT_TRUNCATE
+
+      @group     = options[:group]
 
       @unpacker  = "A#{@length}"
 

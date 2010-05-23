@@ -40,9 +40,24 @@ describe FixedWidth::Section do
       @section.should have(1).columns
     end
 
-    it "should prevent duplicate column names" do
+    it "should prevent duplicate column names without any groupings" do
       @section.column :id, 10
       lambda { @section.column(:id, 30) }.should raise_error(FixedWidth::DuplicateColumnNameError, /column named 'id'/)
+    end
+    
+    it "should prevent column names that already exist as groups" do
+      @section.column :foo, 11, :group => :id
+      lambda { @section.column(:id, 30) }.should raise_error(FixedWidth::DuplicateGroupNameError, /group named 'id'/)
+    end
+    
+    it "should prevent duplicate column names within groups" do
+      @section.column :id, 10, :group => :foo
+      lambda { @section.column(:id, 30, :group => :foo) }.should raise_error(FixedWidth::DuplicateColumnNameError, /column named 'id' in the ':foo' group/)
+    end
+    
+    it "should allow duplicate column names in different groups" do
+      @section.column :id, 10, :group => :foo
+      lambda { @section.column(:id, 30, :group => :bar) }.should_not raise_error(FixedWidth::DuplicateColumnNameError)
     end
 
     it "should allow duplicate column names that are reserved (i.e. spacer)" do
@@ -121,6 +136,21 @@ describe FixedWidth::Section do
       @section.should have(5).columns
       parsed = @section.parse(@line)
       parsed.should have(4).keys
+    end
+    
+    it "should break columns into groups" do
+      @section.column(:id, 5)
+      @section.column(:first, 10, :group => :name)
+      @section.column(:last, 10, :group => :name)
+      @section.column(:state, 2, :group => :address)
+      @section.spacer 5
+      @section.should have(5).columns
+      parsed = @section.parse(@line)
+      parsed.should have(3).keys
+      parsed[:id].should == '45'
+      parsed[:name][:first].should == 'Ryan'
+      parsed[:name][:last].should == 'Wood'
+      parsed[:address][:state].should == 'SC'
     end
   end
 
