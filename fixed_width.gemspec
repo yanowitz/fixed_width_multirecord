@@ -27,6 +27,7 @@ Renamed the gem to be a little clearer as to its purpose. Hate that 'nokogiri' n
      "Rakefile",
      "TODO",
      "VERSION",
+     "examples/readme_example.rb",
      "fixed_width.gemspec",
      "lib/fixed_width.rb",
      "lib/fixed_width/column.rb",
@@ -56,7 +57,8 @@ Renamed the gem to be a little clearer as to its purpose. Hate that 'nokogiri' n
      "spec/generator_spec.rb",
      "spec/parser_spec.rb",
      "spec/section_spec.rb",
-     "spec/spec_helper.rb"
+     "spec/spec_helper.rb",
+     "examples/readme_example.rb"
   ]
 
   if s.respond_to? :specification_version then
