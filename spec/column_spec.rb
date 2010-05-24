@@ -58,6 +58,22 @@ describe FixedWidth::Column do
   end
 
   describe "when parsing a value from a file" do
+    it "should return nil for blank fields if specified" do
+      @column = FixedWidth::Column.new(@name, @length, :padding => '0', :nil_blank => true)
+      @column.parse('    name ').should == 'name '
+      @column.parse("   \t   \n").should == nil
+      @column.parse("   0  \n").should == "0  \n"
+      @column.parse('    ').should == nil
+    end
+    
+    it "should default to returning formatted strings if nil_blank is not set" do
+      @column = FixedWidth::Column.new(@name, @length, :padding => '0', :nil_blank => false)
+      @column.parse('    name ').should == 'name '
+      @column.parse("   \t   \n").should == ""
+      @column.parse("   0  \n").should == "0  \n"
+      @column.parse('    ').should == ""
+    end
+    
     it "should default to a right-aligned string" do
       @column.parse('    name ').should == 'name '
       @column.parse("   \t   234").should == '234'

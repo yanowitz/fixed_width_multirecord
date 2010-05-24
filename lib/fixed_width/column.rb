@@ -29,10 +29,16 @@ class FixedWidth
       @formatter = options[:formatter]
       @formatter ||= DEFAULT_FORMATTER
       @formatter = @formatter.to_proc if @formatter.is_a?(Symbol)
+
+      @nil_blank = options[:nil_blank]
     end
 
     def parse(value)
-      @parser.call(value)
+      if @nil_blank && blank?(value)
+        return nil
+      else
+        @parser.call(value)
+      end
     rescue
       raise ParserError.new("The value '#{value}' could not be parsed: #{$!}")
     end
@@ -46,6 +52,10 @@ class FixedWidth
     end
 
     private
+    BLANK_REGEX = /^\s+$/
+    def blank?(value)
+      value =~ BLANK_REGEX
+    end
 
     def pad(value)
       case @alignment

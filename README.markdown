@@ -13,6 +13,8 @@ FEATURES:
 SYNOPSIS:
 =========
 
+##Creating a definition
+
     # Create a FixedWidth::Defintion to describe a file format
     FixedWidth.define :simple do |d|
       # This is a template section that can be reused in other sections
@@ -47,7 +49,21 @@ SYNOPSIS:
       end
     end
 
-`:parser` and `:formatter` options are symbols (to be proc-ified) or procs. By default, parsing and formatting assume that we're expecting/writing right-aligned strings, padded with spaces.
+##Column Options:
+
+* `:align` can be set to `:left` or `:right`, to indicate which side the values should be/are justified to.
+
+* `:group` can be set to a `Symbol` indicating the name of the nested hash which the value should be parsed to when reading/the name of the nested hash the value should be extracted from when writing.
+
+* `:parser` and `:formatter` options are symbols (to be proc-ified) or procs. By default, parsing and formatting assume that we're expecting/writing right-aligned strings, padded with spaces.
+
+* `:nil_blank` set to true will cause whitespace-only fields to be parsed to nil, regardless of `:parser`.
+
+* `:padding` can be set to a single character that will be used to pad formatted values, when writing fixed-width files.
+
+* `:truncate` can be set to true to truncate any value that exceeds the `length` property of a column. If unset or set to `false`, a `FixedWidth::FormattedStringExceedsLengthError` exception will be thrown.
+
+##Writing out fixed-width records
 
 Then either feed it a nested struct with data values to create the file in the defined format:
 
