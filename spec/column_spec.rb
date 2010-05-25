@@ -63,7 +63,7 @@ describe FixedWidth::Column do
       @column.parse('    name ').should == 'name '
       @column.parse("   \t   \n").should == nil
       @column.parse("   0  \n").should == "0  \n"
-      @column.parse('    ').should == nil
+      @column.parse('').should == nil
     end
     
     it "should default to returning formatted strings if nil_blank is not set" do
@@ -71,7 +71,7 @@ describe FixedWidth::Column do
       @column.parse('    name ').should == 'name '
       @column.parse("   \t   \n").should == ""
       @column.parse("   0  \n").should == "0  \n"
-      @column.parse('    ').should == ""
+      @column.parse('').should == ""
     end
     
     it "should default to a right-aligned string" do

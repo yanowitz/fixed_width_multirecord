@@ -52,7 +52,7 @@ class FixedWidth
     end
 
     private
-    BLANK_REGEX = /^\s+$/
+    BLANK_REGEX = /^\s*$/
     def blank?(value)
       value =~ BLANK_REGEX
     end
