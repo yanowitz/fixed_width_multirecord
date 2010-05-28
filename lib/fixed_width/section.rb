@@ -1,6 +1,6 @@
 class FixedWidth
   class Section
-    attr_accessor :definition, :optional
+    attr_accessor :definition, :optional, :singular
     attr_reader :name, :columns, :options
 
     def initialize(name, options={})
@@ -9,6 +9,7 @@ class FixedWidth
       @columns  = []
       @trap     = options[:trap]
       @optional = options[:optional] || false
+      @singular = options[:singular] || false
     end
 
     def column(name, length, options={})

@@ -36,8 +36,12 @@ class FixedWidth
     end
 
     def add_to_section(section, line)
-      @parsed[section.name] ||= []
-      @parsed[section.name] << section.parse(line)
+      if section.singular
+        @parsed[section.name] = section.parse(line)
+      else
+        @parsed[section.name] ||= []
+        @parsed[section.name] << section.parse(line)
+      end
     end
   end
 end

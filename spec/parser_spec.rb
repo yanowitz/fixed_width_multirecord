@@ -42,12 +42,49 @@ describe FixedWidth::Parser do
         "FOOT         1\n"
       ])
       expected = {
-        :header => [ {:type => "HEAD", :file_id => "1" }],
+        :header => [ {:type => "HEAD", :file_id => "1" } ],
         :body => [ 
           {:first => "Paul", :last => "Hewson" },
           {:first => "Dave", :last => "Evans" }
         ],
-        :footer => [ {:type => "FOOT", :file_id => "1" }]
+        :footer => [ {:type => "FOOT", :file_id => "1" } ]
+      }
+      result = @parser.parse
+      result.should == expected
+    end
+
+    it "should treat singular sections properly" do
+      @definition = FixedWidth.define :test do |d|
+        d.header(:singular => true) do |h|
+          h.trap { |line| line[0,4] == 'HEAD' }
+          h.column :type, 4
+          h.column :file_id, 10
+        end
+        d.body do |b|
+          b.trap { |line| line[0,4] =~ /[^(HEAD|FOOT)]/ }
+          b.column :first, 10
+          b.column :last, 10
+        end
+        d.footer(:singular => true) do |f|
+          f.trap { |line| line[0,4] == 'FOOT' }
+          f.column :type, 4
+          f.column :file_id, 10
+        end
+      end
+      @parser = FixedWidth::Parser.new(@definition, @file)
+      @file.should_receive(:readlines).and_return([
+        "HEAD         1\n",
+        "      Paul    Hewson\n",
+        "      Dave     Evans\n",
+        "FOOT         1\n"
+      ])
+      expected = {
+        :header => {:type => "HEAD", :file_id => "1" },
+        :body => [
+          {:first => "Paul", :last => "Hewson" },
+          {:first => "Dave", :last => "Evans" }
+        ],
+        :footer => {:type => "FOOT", :file_id => "1" }
       }
       result = @parser.parse
       result.should == expected
