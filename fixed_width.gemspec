@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{fixed_width}
-  s.version = "0.1.0"
+  s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Timon Karnezos"]
-  s.date = %q{2010-05-24}
+  s.date = %q{2010-05-29}
   s.description = %q{Shamelessly forked from ryanwood/slither [http://github.com/ryanwood/slither].
 
 Renamed the gem to be a little clearer as to its purpose. Hate that 'nokogiri' nonsense.

@@ -3,9 +3,9 @@ class FixedWidth
     attr_reader :sections, :templates, :options
 
     def initialize(options={})
-      @sections = []
+      @sections  = []
       @templates = {}
-      @options = { :align => :right }.merge(options)
+      @options   = { :align => :right }.merge(options)
     end
 
     def section(name, options={}, &block)

@@ -51,7 +51,7 @@ SYNOPSIS:
 
 ##Column Options:
 
-* `:align` can be set to `:left` or `:right`, to indicate which side the values should be/are justified to.
+* `:align` can be set to `:left` or `:right`, to indicate which side the values should be/are justified to. By default, all columns are aligned `:right`.
 
 * `:group` can be set to a `Symbol` indicating the name of the nested hash which the value should be parsed to when reading/the name of the nested hash the value should be extracted from when writing.
 
@@ -62,6 +62,12 @@ SYNOPSIS:
 * `:padding` can be set to a single character that will be used to pad formatted values, when writing fixed-width files.
 
 * `:truncate` can be set to true to truncate any value that exceeds the `length` property of a column. If unset or set to `false`, a `FixedWidth::FormattedStringExceedsLengthError` exception will be thrown.
+
+## Section options:
+
+* `:singular` (default `false`) indicates that the section will only have a single record, and that it should not be returned nested in an array.
+
+* `:optional` (default `false`) indicates that the section is optional. (An otherwise-specified section will raise a `RequiredSectionNotFoundError` if the trap block doesn't match the row after the last one of the previous section.)
 
 ##Writing out fixed-width records
 

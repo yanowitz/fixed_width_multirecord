@@ -1,3 +1,11 @@
+v0.1.1 (2010-05-29)
+=========================
+    * column grouping (parsing and writing)
+    * :singular section option
+    * :nil_blank column option
+    * some rdoc for FixedWidth
+    * idiomatic syntax cleanup
+
 v0.1.0 (2010-05-19)
 =========================
     * non-release (hence untagged)
