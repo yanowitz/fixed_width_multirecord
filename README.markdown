@@ -146,6 +146,4 @@ Or parse files already in that format into a nested hash:
 INSTALL:
 ========
 
-Soon you'll be able to do
     sudo gem install fixed_width
-but alas, not yet.
