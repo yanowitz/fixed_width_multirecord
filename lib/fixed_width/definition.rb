@@ -9,7 +9,7 @@ class FixedWidth
     end
 
     def section(name, options={}, &block)
-      raise ArgumentError.new("Duplicate section name: '#{name}'") if @sections.detect{|s| s.name == name }
+      raise DuplicateSectionNameError.new("Duplicate section name: '#{name}'") if @sections.detect{|s| s.name == name }
 
       section = FixedWidth::Section.new(name, @options.merge(options))
       section.definition = self

@@ -44,17 +44,22 @@ describe FixedWidth::Section do
       @section.column :id, 10
       lambda { @section.column(:id, 30) }.should raise_error(FixedWidth::DuplicateColumnNameError, /column named 'id'/)
     end
-    
+
     it "should prevent column names that already exist as groups" do
       @section.column :foo, 11, :group => :id
       lambda { @section.column(:id, 30) }.should raise_error(FixedWidth::DuplicateGroupNameError, /group named 'id'/)
     end
-    
+
+    it "should prevent group names that already exist as columns" do
+      @section.column :foo, 11
+      lambda { @section.column(:id, 30, :group => :foo) }.should raise_error(FixedWidth::DuplicateGroupNameError, /column named 'foo'/)
+    end
+
     it "should prevent duplicate column names within groups" do
       @section.column :id, 10, :group => :foo
       lambda { @section.column(:id, 30, :group => :foo) }.should raise_error(FixedWidth::DuplicateColumnNameError, /column named 'id' in the ':foo' group/)
     end
-    
+
     it "should allow duplicate column names in different groups" do
       @section.column :id, 10, :group => :foo
       lambda { @section.column(:id, 30, :group => :bar) }.should_not raise_error(FixedWidth::DuplicateColumnNameError)
