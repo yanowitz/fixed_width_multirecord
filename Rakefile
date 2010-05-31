@@ -15,6 +15,8 @@ begin
     gemspec.name = "fixed_width"
     gemspec.summary = "A gem that provides a DSL for parsing and writing files of fixed-width records."
     gemspec.description = <<END
+A gem that provides a DSL for parsing and writing files of fixed-width records.
+
 Shamelessly forked from ryanwood/slither [http://github.com/ryanwood/slither].
 
 Renamed the gem to be a little clearer as to its purpose. Hate that 'nokogiri' nonsense.
