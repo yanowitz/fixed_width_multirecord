@@ -16,7 +16,7 @@ describe FixedWidth::Definition do
     end
 
     it "should override the default if :align is passed to the section" do
-      section = mock('section', :null_object => true)
+      section = mock('section').as_null_object
       FixedWidth::Section.should_receive(:new).with('name', {:align => :left}).and_return(section)
       d = FixedWidth::Definition.new
       d.options[:align].should == :right
@@ -27,7 +27,7 @@ describe FixedWidth::Definition do
   describe "when creating a section" do
     before(:each) do
       @d = FixedWidth::Definition.new
-      @section = mock('section', :null_object => true)
+      @section = mock('section').as_null_object
     end
 
     it "should create and yield a new section object" do
@@ -53,7 +53,7 @@ describe FixedWidth::Definition do
   describe "when creating a template" do
     before(:each) do
       @d = FixedWidth::Definition.new
-      @section = mock('section', :null_object => true)
+      @section = mock('section').as_null_object
     end
 
     it "should create a new section" do

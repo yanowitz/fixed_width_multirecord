@@ -71,7 +71,7 @@ describe FixedWidth do
     end
 
     it "should create a parser and call parse" do
-      parser = mock("parser", :null_object => true)
+      parser = mock("parser").as_null_object
       definition = mock('definition')
       FixedWidth.should_receive(:definition).with(:test).and_return(definition)
       FixedWidth::Parser.should_receive(:new).with(definition, @file).and_return(parser)

@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
+require 'date'
 
 describe FixedWidth::Column do
   before(:each) do
