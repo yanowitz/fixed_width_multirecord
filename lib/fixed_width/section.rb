@@ -1,91 +1,86 @@
 class FixedWidth
   class Section
     attr_accessor :definition, :optional, :singular
-    attr_reader :name, :columns, :options
+    attr_reader :options, :first_line_parser, :additional_lines
 
-    def initialize(name, options={})
-      @name     = name
-      @options  = options
-      @columns  = []
-      @trap     = options[:trap]
-      @optional = options[:optional] || false
-      @singular = options[:singular] || false
+    def short_name
+      @name
     end
 
-    def column(name, length, options={})
-      if column_names_by_group(options[:group]).include?(name)
-        raise FixedWidth::DuplicateColumnNameError.new("You have already defined a column named '#{name}' in the '#{options[:group].inspect}' group.")
-      end
-      if column_names_by_group(nil).include?(options[:group])
-        raise FixedWidth::DuplicateGroupNameError.new("You have already defined a column named '#{options[:group]}'; you cannot have a group and column of the same name.")
-      end
-      if group_names.include?(name)
-        raise FixedWidth::DuplicateGroupNameError.new("You have already defined a group named '#{name}'; you cannot have a group and column of the same name.")
-      end
-
-      col = Column.new(name, length, @options.merge(options))
-      @columns << col
-      col
+    def name
+      @parent ? (@parent.name.to_s + "::#{@name}") : @name
     end
 
-    def spacer(length, spacer=nil)
-      options           = {}
-      options[:padding] = spacer if spacer
-      column(:spacer, length, options)
+    def initialize(section_name, options={}, &block)
+      @name        = section_name
+      @options     = options
+      @optional    = options[:optional] || false
+      @singular    = options[:singular] || false
+      @parent      = options[:parent]
+      @definition  = options[:definition]
+
+      @first_line_parser = FixedWidth::LineParser.new(options.merge(:name => @name))
+
+      @additional_lines = []
+
+      block.call(self)
     end
 
-    def trap(&block)
-      @trap = block
+    ## Used for Section Definition
+    def method_missing(method, *args, &block)
+      @first_line_parser.send(method, *args, &block)
     end
 
-    def template(name)
-      template = @definition.templates[name]
-      raise ArgumentError.new("Template '#{name}' not found as a known template.") unless template
-      @columns += template.columns
-      # Section options should trump template options
-      @options = template.options.merge(@options)
+    def line(line_name, options = {}, &block)
+      options[:parent] = self
+      @additional_lines << self.class.new(line_name, @options.merge(options), &block)
     end
 
+    ## Used for Section Output
     def format(data)
-      @columns.map do |c|
-        hash = c.group ? data[c.group] : data
-        c.format(hash[c.name])
-      end.join
+      lines = [@first_line_parser.format(data)]
+      @additional_lines.each do |line_parser|
+        lines << line_parser.format(data[line_parser.short_name])
+      end
+      lines.compact
     end
 
-    def parse(line)
-      line_data = line.unpack(unpacker)
-      row       = group_names.inject({}) {|h,g| h[g] = {}; h }
+    ## Used for Section Input (parsing)
+    def parse( params )
+      input = params[:input]
+      output = params[:output]
 
-      @columns.each_with_index do |c, i|
-        next if c.name == :spacer
-        assignee         = c.group ? row[c.group] : row
-        assignee[c.name] = c.parse(line_data[i])
+      rows = []
+
+      while row = process_record(input)
+        rows << row
       end
 
-      row
-    end
+      if rows.size == 0 && !self.optional
+        raise FixedWidth::RequiredSectionNotFoundError.new("Required section '#{name}' was not found.")
+      end
 
-    def match(raw_line)
-      raw_line.nil? ? false : @trap.call(raw_line)
-    end
-
-    def method_missing(method, *args)
-      column(method, *args)
+      if !rows.empty?
+        if singular
+          output[@name] = rows.last
+        else
+          output[@name] = rows
+        end
+      end
     end
 
     private
+    def process_record(input)
+      record = @first_line_parser.parse(input)
 
-    def column_names_by_group(group)
-      @columns.select{|c| c.group == group }.map(&:name) - [:spacer]
-    end
+      return nil unless record
 
-    def group_names
-      @columns.map(&:group).compact.uniq
-    end
+      @additional_lines.each do |section|
+        while section.parse(:input => input, :output => record)
+        end
+      end
 
-    def unpacker
-      @unpacker ||= @columns.map(&:unpacker).join
+      record
     end
   end
 end

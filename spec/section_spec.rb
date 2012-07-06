@@ -2,175 +2,154 @@ require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe FixedWidth::Section do
   before(:each) do
-    @section = FixedWidth::Section.new(:body)
+    @section = FixedWidth::Section.new(:body) {}
   end
 
-  it "should have no columns after creation" do
-    @section.columns.should be_empty
-  end
-
-  describe "when adding columns" do
-    it "should build an ordered column list" do
-      @section.should have(0).columns
-
-      col1 = @section.column :id, 10
-      col2 = @section.column :name, 30
-      col3 = @section.column :state, 2
-
-      @section.should have(3).columns
-      @section.columns[0].should be(col1)
-      @section.columns[1].should be(col2)
-      @section.columns[2].should be(col3)
+  describe "section definitions" do
+    it "initialises a line parser" do
+      options = {:option1 => :value1}
+      FixedWidth::LineParser.should_receive(:new).with(options.merge(:name => :a_section_name))
+      FixedWidth::Section.new(:a_section_name, options) {}
     end
 
-    it "should create spacer columns" do
-      @section.should have(0).columns
-      @section.spacer(5)
-      @section.should have(1).columns
+    it "yields the block it's passed" do
+      yielded = false
+      new_section = FixedWidth::Section.new(:a_section_name) do |section|
+        yielded = section
+      end
+      yielded.should == new_section
     end
 
-    it "can should override the alignment of the definition" do
-      section = FixedWidth::Section.new('name', :align => :left)
-      section.options[:align].should == :left
+    it "delegates column definitions to the line parser" do
+      line_parser = @section.first_line_parser
+      line_parser.should_receive(:some_column_name).with(10, :some_option => :that_gets_passed_through)
+      @section.some_column_name( 10, :some_option => :that_gets_passed_through )
     end
 
-    it "should use a missing method to create a column" do
-      @section.should have(0).columns
-      @section.first_name 5
-      @section.should have(1).columns
+    describe "#columns" do
+      it "proxies columns to the first_line_parser" do
+        @section.first_line_parser.should_receive(:columns)
+        @section.columns
+      end
     end
 
-    it "should prevent duplicate column names without any groupings" do
-      @section.column :id, 10
-      lambda { @section.column(:id, 30) }.should raise_error(FixedWidth::DuplicateColumnNameError, /column named 'id'/)
-    end
-
-    it "should prevent column names that already exist as groups" do
-      @section.column :foo, 11, :group => :id
-      lambda { @section.column(:id, 30) }.should raise_error(FixedWidth::DuplicateGroupNameError, /group named 'id'/)
-    end
-
-    it "should prevent group names that already exist as columns" do
-      @section.column :foo, 11
-      lambda { @section.column(:id, 30, :group => :foo) }.should raise_error(FixedWidth::DuplicateGroupNameError, /column named 'foo'/)
-    end
-
-    it "should prevent duplicate column names within groups" do
-      @section.column :id, 10, :group => :foo
-      lambda { @section.column(:id, 30, :group => :foo) }.should raise_error(FixedWidth::DuplicateColumnNameError, /column named 'id' in the ':foo' group/)
-    end
-
-    it "should allow duplicate column names in different groups" do
-      @section.column :id, 10, :group => :foo
-      lambda { @section.column(:id, 30, :group => :bar) }.should_not raise_error(FixedWidth::DuplicateColumnNameError)
-    end
-
-    it "should allow duplicate column names that are reserved (i.e. spacer)" do
-      @section.spacer 10
-      lambda { @section.spacer 10 }.should_not raise_error(FixedWidth::DuplicateColumnNameError)
+    describe "#line" do
+      it "creates additional sections (with a parent relationship)" do
+        mock_section = mock(FixedWidth::Section)
+        FixedWidth::Section.should_receive(:new).with(:second_record, {:parent => @section}).and_yield(mock_section)
+        second_record = nil
+        @section.line( :second_record ) do |section|
+          second_record = section
+        end
+        second_record.should == mock_section
+        @section.additional_lines.should == [mock_section]
+      end
     end
   end
 
-  it "should accept and store the trap as a block" do
-    @section.trap { |v| v == 4 }
-    trap = @section.instance_variable_get(:@trap)
-    trap.should be_a(Proc)
-    trap.call(4).should == true
+  describe "#name" do
+    it "builds a name based on the parent relationships" do
+      @child           = FixedWidth::Section.new(:child, :parent => @section) {} 
+      @grandchild      = FixedWidth::Section.new(:grandchild, :parent => @child) {} 
+      @section.name    == "body"
+      @child.name      == "body::child"
+      @grandchild.name == "body::child::grandchild"
+    end
   end
 
-  describe "when adding a template" do
+  describe "#parse" do
     before(:each) do
-      @template = mock('templated section', :columns => [1,2,3], :options => {})
-      @definition = mock("definition", :templates => { :test => @template } )
-      @section.definition = @definition
-    end
-
-    it "should ensure the template exists" do
-      @definition.stub! :templates => {}
-      lambda { @section.template(:none) }.should raise_error(ArgumentError)
-    end
-
-    it "should add the template columns to the current column list" do
-      @section.template :test
-      @section.should have(3).columns
-    end
-
-    it "should merge the template option" do
-       @section = FixedWidth::Section.new(:body, :align => :left)
-       @section.definition = @definition
-       @template.stub! :options => {:align => :right}
-       @section.template :test
-       @section.options.should == {:align => :left}
-    end
-  end
-
-  describe "when formatting a row" do
-    before(:each) do
-      @data = { :id => 3, :name => "Ryan" }
-    end
-
-    it "should default to string data aligned right" do
-      @section.column(:id, 5)
-      @section.column(:name, 10)
-      @section.format( @data ).should == "    3      Ryan"
-    end
-
-    it "should left align if asked" do
-      @section.column(:id, 5)
-      @section.column(:name, 10, :align => :left)
-      @section.format(@data).should == "    3Ryan      "
-    end
-
-    it "should read from groups" do
-      @data = { :id => 3, :foo => { :name => "Ryan" } }
-      @section.column(:id, 5)
-      @section.column(:name, 10, :align => :left, :group => :foo)
-      @section.format(@data).should == "    3Ryan      "
-    end
-  end
-
-  describe "when parsing a file" do
-    before(:each) do
-      @line = '   45      Ryan      WoodSC '
-      @section = FixedWidth::Section.new(:body)
       @column_content = { :id => 5, :first => 10, :last => 10, :state => 2 }
+      @section = FixedWidth::Section.new(:body, :optional => true) do |section|
+        @column_content.each { |k,v| section.column(k, v) }
+      end
+
+      @input = ["some fake data"]
+      @parsed_input = { :id => '45', :first => 'Ryan', :last => 'Wood', :state => 'SC' } 
+      @output = {}
+
+      @section.stub(:process_record).and_return(nil)
     end
 
-    it "should return a key for key column" do
-      @column_content.each { |k,v| @section.column(k, v) }
-      parsed = @section.parse(@line)
-      @column_content.each_key { |name| parsed.should have_key(name) }
+    it "keeps the last row processed if the record is singular" do
+      @section.should_receive(:process_record).and_return(@parsed_input)
+      @section.stub(:singular => true)
+      @section.parse( :input => @input, :output => @output )
+      @output.should == { :body => @parsed_input }      
     end
 
-    it "should not return a key for reserved names" do
-      @column_content.each { |k,v| @section.column(k, v) }
-      @section.spacer 5
-      @section.should have(5).columns
-      parsed = @section.parse(@line)
-      parsed.should have(4).keys
+    it "keeps an array of processed rows" do
+      @section.should_receive(:process_record).and_return(@parsed_input)
+      @section.should_receive(:process_record).and_return('more parsed stuff')
+      @section.parse(:input => @input, :output => @output)
+      @output.should == { :body => [@parsed_input, 'more parsed stuff'] }      
     end
-    
-    it "should break columns into groups" do
-      @section.column(:id, 5)
-      @section.column(:first, 10, :group => :name)
-      @section.column(:last, 10, :group => :name)
-      @section.column(:state, 2, :group => :address)
-      @section.spacer 5
-      @section.should have(5).columns
-      parsed = @section.parse(@line)
-      parsed.should have(3).keys
-      parsed[:id].should == '45'
-      parsed[:name][:first].should == 'Ryan'
-      parsed[:name][:last].should == 'Wood'
-      parsed[:address][:state].should == 'SC'
+
+    describe "error handling" do
+      it "raises an error if now rows" do
+        @section.stub(:optional => nil)
+        lambda { @section.parse(:input => @input, :output => @output) }.should raise_error(FixedWidth::RequiredSectionNotFoundError)
+      end
+
+      it "ignores empty rows if this section is optional" do
+        lambda { @section.parse(:input => @input, :output => @output) }.should_not raise_error
+      end
     end
   end
 
-  it "should try to match a line using the trap" do
-    @section.trap do |line|
-      line == 'hello'
+  describe "#format" do
+    it "calls the first_line_parser formatter" do
+      @section.first_line_parser.should_receive(:format).with(:ignore => :this).and_return("a line")
+      @section.format(:ignore => :this)
     end
-    @section.match('hello').should be_true
-    @section.match('goodbye').should be_false
+
+    it "returns an array" do
+      @section.first_line_parser.stub(:format => "a line")
+      @section.format({}).should == ["a line"]
+    end
+
+    it "handles multi-line records" do
+      @section.first_line_parser.stub(:format => "first line")
+      data = {:line2 => { :key1 => :value1, :key2 => :value2 }}
+       
+      mock_section = mock(FixedWidth::Section, :short_name => :line2)
+      @section.instance_variable_set('@additional_lines', [mock_section])
+      mock_section.should_receive(:format).with(data[:line2]).and_return("another line")
+
+      @section.format(data).should == ["first line", "another line"]
+    end
+  end
+
+  describe "#process_record" do
+    it "calls @first_line_parser#parse" do
+      input = mock('input')
+      @section.first_line_parser.should_receive(:parse).with(input).and_return(nil)
+      @section.send(:process_record, input)
+    end
+
+    it "iterates across all the potential subrecords"  do
+      input = mock('input')
+      @section.first_line_parser.stub(:parse => {:a => :b})
+
+      @section.instance_variable_set('@additional_lines', [mock('section1'), mock('section2')])
+      @section.additional_lines.each do |l| 
+        l.stub(:parse => nil) 
+        l.should_receive(:parse).with(:input => input, :output => {:a => :b}).and_return(true)
+      end
+
+      @section.send(:process_record, input)
+    end
+
+    it "returns nil if parse fails" do
+      input = mock('input')
+      @section.first_line_parser.should_receive(:parse).with(input).and_return(nil)
+      @section.send(:process_record, input).should == nil
+    end
+
+    it "returns a new record" do
+      input = mock('input')
+      @section.first_line_parser.should_receive(:parse).with(input).and_return({:a_record => :of_data})
+      @section.send(:process_record, input).should == {:a_record => :of_data}
+    end
   end
 end

@@ -43,7 +43,7 @@ describe FixedWidth do
       generator = mock('generator')
       generator.should_receive(:generate).with({})
       FixedWidth.should_receive(:definition).with(:test).and_return(definition)
-      FixedWidth::Generator.should_receive(:new).with(definition).and_return(generator)
+      FixedWidth::Generator.should_receive(:new).with(definition,"\n").and_return(generator)
       FixedWidth.generate(:test, {})
     end
 

@@ -1,8 +1,9 @@
 class FixedWidth
   class Generator
-
-    def initialize(definition)
+    attr_accessor :record_separator
+    def initialize(definition,separator = "\n")
       @definition = definition
+      @record_separator = separator
     end
 
     def generate(data)
@@ -13,7 +14,8 @@ class FixedWidth
         raise FixedWidth::RequiredSectionEmptyError.new("Required section '#{section.name}' was empty.") if (content.nil? || content.empty?) && !section.optional
         arrayed_content.each {|row| @builder << section.format(row) }
       end
-      @builder.join("\n")
+      @builder << "" # so we get a final record separator
+      @builder.flatten.join(record_separator)
     end
 
   end

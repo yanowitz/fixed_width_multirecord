@@ -36,15 +36,15 @@ class FixedWidth
   end
 
   #
-  # [data]            nested hash describing the contents of the sections
-  # [definition_name] symbol +name+ used in +define+
-  #
+  # [data]             nested hash describing the contents of the sections
+  # [definition_name]  symbol +name+ used in +define+
+  # [record_separator] string to separate each line with, defaults to \n
   # returns: string of the transformed +data+ (into fixed-width records).
   #
-  def self.generate(definition_name, data)
+  def self.generate(definition_name, data, record_separator = "\n")
     definition = definition(definition_name)
     raise ArgumentError.new("Definition name '#{name}' was not found.") unless definition
-    generator = Generator.new(definition)
+    generator = Generator.new(definition, record_separator)
     generator.generate(data)
   end
 

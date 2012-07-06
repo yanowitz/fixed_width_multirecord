@@ -53,6 +53,56 @@ describe FixedWidth::Parser do
       result.should == expected
     end
 
+    describe "multi-line records" do
+      before(:each) do
+        @definition = FixedWidth.define :test do |d|
+          d.header(:singular => true) do |h|
+            h.trap { |line| line[0,4] == 'HEAD' }
+            h.column :type, 4
+            h.column :file_id, 10
+          end
+          d.body do |b|
+            b.trap { |line| line[0,4] == 'BODY' }
+            b.column :type, 4
+            b.column :first, 10
+            b.column :last, 10
+            b.line :address_record, :optional => true, :singular => true do |ar|
+             ar.trap { |line| line[0,4] == 'ADDR' }
+             ar.type 4
+             ar.street 14
+             ar.zip 5
+            end
+          end
+          d.footer(:singular => true) do |f|
+            f.trap { |line| line[0,4] == 'FOOT' }
+            f.column :type, 4
+            f.column :file_id, 10
+          end
+        end
+        @parser = FixedWidth::Parser.new(@definition, @file)
+      end
+
+      it "handles nested lines" do
+        @file.should_receive(:readlines).and_return([
+          "HEAD         1\n",
+          "BODY  Paul    Hewson\n",
+          "BODY  Dave     Evans\n",
+          "ADDR1234 Main St  01002\n",
+          "FOOT         1\n"
+        ])
+        expected = {
+          :header => {:type => "HEAD", :file_id => "1" },
+          :body => [ 
+            {:type => "BODY", :first => "Paul", :last => "Hewson" },
+            {:type => "BODY", :first => "Dave", :last => "Evans", :address_record => {:type => "ADDR", :street => "1234 Main St", :zip => "01002" }}
+          ],
+            :footer => {:type => "FOOT", :file_id => "1" }
+        }
+        result = @parser.parse
+        result.should == expected
+      end
+    end
+
     it "should treat singular sections properly" do
       @definition = FixedWidth.define :test do |d|
         d.header(:singular => true) do |h|

@@ -6,21 +6,18 @@ class FixedWidth
       @sections  = []
       @templates = {}
       @options   = { :align => :right }.merge(options)
+      @options[:definition] = self
     end
 
     def section(name, options={}, &block)
       raise DuplicateSectionNameError.new("Duplicate section name: '#{name}'") if @sections.detect{|s| s.name == name }
 
-      section = FixedWidth::Section.new(name, @options.merge(options))
-      section.definition = self
-      yield(section)
+      section = FixedWidth::Section.new(name, @options.merge(options), &block)
       @sections << section
-      section
     end
 
     def template(name, options={}, &block)
-      section = FixedWidth::Section.new(name, @options.merge(options))
-      yield(section)
+      section = FixedWidth::Section.new(name, @options.merge(options), &block)
       @templates[name] = section
     end
 

@@ -18,7 +18,8 @@ FixedWidth.define :simple do |d|
   end
 
   d.body do |body|
-    body.trap { |line| line[0,4] =~ /[^(HEAD|FOOT)]/ }
+    body.trap { |line| line[0,4] == 'BODY' }
+    body.column :type, 4
     body.column :id, 10, :parser => :to_i
     body.column :first, 10, :align => :left, :group => :name
     body.column :last,  10, :align => :left, :group => :name
@@ -26,6 +27,12 @@ FixedWidth.define :simple do |d|
     body.column :city, 20  , :group => :address
     body.column :state, 2  , :group => :address
     body.column :country, 3, :group => :address
+    body.line   :bank_info, :optional => true, :singular => true do |bank_info|
+      bank_info.trap {|line| line[0,4] == 'BANK'}
+      bank_info.column :type, 4
+      bank_info.column :account, 10
+      bank_info.column :routing, 9
+    end
   end
 
   d.footer do |footer|
@@ -37,11 +44,12 @@ end
 
 test_data = {
     :body => [
-      { :id => 12,
+      { :id => 12, :type => 'BODY',
         :name => { :first => "Ryan", :last => "Wood" },
-        :address => { :city => "Foo", :state => 'SC', :country => "USA" }
+        :address => { :city => "Foo", :state => 'SC', :country => "USA" },
+        :bank_info => { :type => 'BANK', :account => '1234567890', :routing => '987654321' }
       },
-      { :id => 13,
+      { :id => 13, :type => 'BODY',
         :name => { :first => "Jo", :last => "Schmo" },
         :address => { :city => "Bar", :state => "CA", :country => "USA" }
       }

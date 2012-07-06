@@ -35,6 +35,7 @@ Hopefully this will cover 90% of use cases.
     
       d.body do |body|
         body.trap { |line| line[0,4] =~ /[^(HEAD|FOOT)]/ }
+        body.column :type, 4
         body.column :id, 10, :parser => :to_i
         body.column :first, 10, :align => :left, :group => :name
         body.column :last,  10, :align => :left, :group => :name
@@ -42,6 +43,12 @@ Hopefully this will cover 90% of use cases.
         body.column :city, 20  , :group => :address
         body.column :state, 2  , :group => :address
         body.column :country, 3, :group => :address
+        body.line :account_line, :optional => true do |line|
+          line.trap {|l| l[0,4] == 'CONT' }
+          line.column :type, 4, :group => :bank_account 
+          line.column :routing_number, 10, :group => :bank_account
+          line.column :account_number, 20, :group => :bank_account
+        end
       end
     
       d.footer do |footer|
@@ -57,7 +64,8 @@ This definition would output a parsed file something like this:
         :body => [
           { :id => 12,
             :name => { :first => "Ryan", :last => "Wood" },
-            :address => { :city => "Foo", :state => 'SC', :country => "USA" }
+            :address => { :city => "Foo", :state => 'SC', :country => "USA" },
+            :bank_account => { :type => 'CONT', :routing_number => "1234567890", :account_number => "12345678901234567890" } 
           },
           { :id => 13,
             :name => { :first => "Jo", :last => "Schmo" },
@@ -88,10 +96,18 @@ Sections can have any name, however duplicates are not allowed. (A `DuplicateSec
 
 * `:optional` (default `false`) indicates that the section is optional. (An otherwise-specified section will raise a `RequiredSectionNotFoundError` if the trap block doesn't match the row after the last one of the previous section.)
 
+##Multi-line records
+###Declaring a multi-line record
+
+Some fixed-width file formats can have records that span lines (often
+conditionally).  If you have such a format, you declare additional lines
+using `line`, nested inside a section.  A line is really a subsection
+and takes all the same arguments a section does. 
+
 ##Columns
 ###Declaring a column
 
-Columns can have any name, except for `:spacer` which is reserved. Also, duplicate column names within groupings are not allowed, and a column cannot share the same name as a group. (A `DuplicateColumnNameError` will be thrown for a duplicate column name within a grouping. A `DuplicateGroupNameError` will be thrown if you try to declare a column with the same name as an existing group or vice versa.) Again, basic `method_missing` trickery here, so be warned. You can declare columns either with the `method_missing` thing or by calling `Section#column`.
+Columns can have any name, except for `:spacer`, `:template`, `:format` and `:line` which are reserved. Also, duplicate column names within groupings are not allowed, and a column cannot share the same name as a group. (A `DuplicateColumnNameError` will be thrown for a duplicate column name within a grouping. A `DuplicateGroupNameError` will be thrown if you try to declare a column with the same name as an existing group or vice versa.) Again, basic `method_missing` trickery here, so be warned. You can declare columns either with the `method_missing` thing or by calling `Section#column`.
 
     FixedWidth.define :simple do |d|
         d.a_section_name do |s|

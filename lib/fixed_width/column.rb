@@ -46,7 +46,7 @@ class FixedWidth
     def format(value)
       pad(
         validate_size(
-          @formatter.call(value)
+          @formatter.call(value).to_s
         )
       )
     end
