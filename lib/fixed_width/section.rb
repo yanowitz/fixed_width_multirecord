@@ -56,16 +56,16 @@ class FixedWidth
         rows << row
       end
 
-      if rows.size == 0 && !self.optional
-        raise FixedWidth::RequiredSectionNotFoundError.new("Required section '#{name}' was not found.")
-      end
-
       if !rows.empty?
         if singular
           output[@name] = rows.last
         else
           output[@name] = rows
         end
+      end
+
+      if !self.optional && (!output[@name] || output[@name].empty?)
+        raise FixedWidth::RequiredSectionNotFoundError.new("Required section '#{name}' was not found.")
       end
     end
 
