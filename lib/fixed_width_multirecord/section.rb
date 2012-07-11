@@ -38,9 +38,17 @@ class FixedWidthMultirecord
 
     ## Used for Section Output
     def format(data)
+      return [] unless data
+ 
       lines = [@first_line_parser.format(data)]
       @additional_lines.each do |line_parser|
-        lines << line_parser.format(data[line_parser.short_name])
+        data_to_parse = data[line_parser.short_name]
+        next unless data_to_parse
+        data_to_parse = [data_to_parse] unless data_to_parse.is_a?(Array)
+
+        data_to_parse.each do |row|
+          lines << line_parser.format(row)
+        end
       end
       lines.compact
     end

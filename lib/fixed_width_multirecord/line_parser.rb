@@ -51,16 +51,10 @@ class FixedWidthMultirecord
     def format(data)
       return nil unless data
 
-      data = data.is_a?(Array) ? data : [data]
-
-      results = data.map do |data_line|
-        columns.map do |c|
-          hash = c.group ? data_line[c.group] : data_line
-          c.format(hash[c.name])
-        end.join
-      end
-
-      results.size > 1 ? results : results.first
+      columns.map do |c|
+        hash = c.group ? data[c.group] : data
+        c.format(hash[c.name])
+      end.join
     end
 
     ## Parsing input

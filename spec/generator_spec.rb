@@ -59,11 +59,18 @@ describe FixedWidthMultirecord::Generator do
           b.column :type, 4
           b.column :first, 10
           b.column :last, 10
-          b.line :address_record, :optional => true, :storage_type => :singular, :singular => true do |ar|
+          b.line :address_record, :optional => true, :singular => true do |ar|
             ar.trap { |line| line[0,4] == 'ADDR' }
             ar.type 4
             ar.street 14
             ar.zip 5
+          end
+          b.line :credit_card, :optional => true do |cc|
+            cc.trap { |line| line[0,4] == 'CARD' }
+            cc.type 4
+            cc.number 16
+            cc.spacer 1
+            cc.expires 4
           end
         end
         d.footer(:singular => true) do |f|
@@ -75,24 +82,39 @@ describe FixedWidthMultirecord::Generator do
       @generator = FixedWidthMultirecord::Generator.new(@definition)
     end
 
-    it "handles multi-line records" do
-      expected = [
-        "HEAD         1\n",
-        "BODY      Paul    Hewson\n",
-        "BODY      Dave     Evans\n",
-        "ADDR  1234 Main St01002\n",
-        "FOOT         1\n"
-      ].join
+    describe "multi-line records" do 
+      before(:each) do
+        @expected_rows = [
+          "HEAD         1\n",
+          "BODY      Paul    Hewson\n",
+          "CARD1234567812345678 0804\n",
+          "CARD2345678123456781 0807\n",
+          "BODY      Dave     Evans\n",
+          "ADDR  1234 Main St01002\n",
+          "FOOT         1\n"
+        ]
 
-      data = {
-        :header => {:type => "HEAD", :file_id => "1" },
-        :body => [ 
-          {:type => "BODY", :first => "Paul", :last => "Hewson" },
-          {:type => "BODY", :first => "Dave", :last => "Evans", :address_record => {:type => "ADDR", :street => "1234 Main St", :zip => "01002" }}
-        ],
-          :footer => {:type => "FOOT", :file_id => "1" }
-      }
-      @generator.generate(data).should == expected 
+        @expected = @expected_rows.join
+      end
+
+      it "handles multi-line records" do
+
+        data = {
+          :header => {:type => "HEAD", :file_id => "1" },
+          :body => [ 
+            {:type => "BODY", :first => "Paul", :last => "Hewson", :credit_card => [{:type => "CARD", :number => "1234567812345678", :expires => "0804"},{:type => "CARD", :number => "2345678123456781", :expires => "0807"}]},
+            {:type => "BODY", :first => "Dave", :last => "Evans", :address_record => {:type => "ADDR", :street => "1234 Main St", :zip => "01002" }}
+          ],
+            :footer => {:type => "FOOT", :file_id => "1" }
+        }
+
+        @generator.generate(data).should == @expected
+      end
+
+      it "ensures that generate/parse are complements of each other" do
+        data = FixedWidthMultirecord.parse(mock(File, :readlines => @expected_rows), :test) 
+        @generator.generate(data).should == @expected
+      end
     end
   end
 
