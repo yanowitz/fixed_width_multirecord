@@ -1,3 +1,4 @@
+* Continue refactoring and make this truly recursive.  The test for Hash vs OpenStruct-style lives in 3 places.  This is proof that the whole generation algorithm needs to be rethought 
 * Add :limit option on sections
 * Add :validation option for columns
 * Add a validate_file() method to parse a file and run all validation tests (implies validation implemented)

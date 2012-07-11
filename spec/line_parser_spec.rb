@@ -124,6 +124,13 @@ describe FixedWidthMultirecord::LineParser do
         @lp.column(:name, 10, :align => :left, :group => :foo)
         @lp.format(@data).should == "    3Ryan      "
       end
+
+      it "handles OpenStructs" do
+        @struct_data = OpenStruct.new(@data)
+        @lp.column(:id, 5)
+        @lp.column(:name, 10)
+        @lp.format(@struct_data).should == "    3      Ryan"
+      end
     end
   end
 

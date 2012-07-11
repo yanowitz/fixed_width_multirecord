@@ -42,7 +42,12 @@ class FixedWidthMultirecord
  
       lines = [@first_line_parser.format(data)]
       @additional_lines.each do |line_parser|
-        data_to_parse = data[line_parser.short_name]
+        data_to_parse = if data.is_a?(Hash)
+          data[line_parser.short_name]
+        else
+          data.send(line_parser.short_name)
+        end
+
         next unless data_to_parse
         data_to_parse = [data_to_parse] unless data_to_parse.is_a?(Array)
 

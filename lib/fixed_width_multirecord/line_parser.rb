@@ -52,8 +52,14 @@ class FixedWidthMultirecord
       return nil unless data
 
       columns.map do |c|
-        hash = c.group ? data[c.group] : data
-        c.format(hash[c.name])
+        hash_or_struct = if c.group
+                           data.is_a?(Hash) ? data[c.group] : data.send(c.group)
+                         else
+                           data
+                         end
+
+        datum = hash_or_struct.is_a?(Hash) ? hash_or_struct[c.name] : hash_or_struct.send(c.name)
+        c.format(datum)
       end.join
     end
 

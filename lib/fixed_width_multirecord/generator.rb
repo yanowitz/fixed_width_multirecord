@@ -9,7 +9,13 @@ class FixedWidthMultirecord
     def generate(data)
       @builder = []
       @definition.sections.each do |section|
-        content = data[section.name]
+        content = nil
+        if data.is_a?(Hash)
+          content = data[section.name]
+        else
+          content = data.send(section.name)
+        end
+
         arrayed_content = content.is_a?(Array) ? content : [content]
         raise FixedWidthMultirecord::RequiredSectionEmptyError.new("Required section '#{section.name}' was empty.") if (content.nil? || content.empty?) && !section.optional
         arrayed_content.each {|row| @builder << section.format(row) }

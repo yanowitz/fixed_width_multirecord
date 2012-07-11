@@ -159,6 +159,26 @@ Or parse files already in that format into a nested hash:
 
     parsed_data = FixedWidth.parse(file_instance, :test).inspect
 
+You can also pass it a nested structure where each object responds to
+the column names specified in the DSL:
+   require 'ostruct'
+   test_ostruct_and_hash = OpenStruct.new( 
+        :body => [
+          OpenStruct.new({ :id => 12,
+            :name => { :first => "Ryan", :last => "Wood" },
+            :address => { :city => "Foo", :state => 'SC', :country => "USA" }
+          }),
+          { :id => 13,
+            :name => { :first => "Jo", :last => "Schmo" },
+            :address => { :city => "Bar", :state => "CA", :country => "USA" }
+          }
+        ],
+        :header => [OpenStruct.new({ :record_type => 'HEAD', :company_id => 'ABC'  })],
+        :footer => [{ :record_type => 'FOOT', :company_id => 'ABC', :record_count => 2  }]
+    })
+
+    puts FixedWidth.generate(:simple, test_ostruct_and_hash)
+
 INSTALL:
 ========
 
