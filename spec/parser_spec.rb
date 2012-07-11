@@ -1,10 +1,10 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe FixedWidth::Parser do
+describe FixedWidthMultirecord::Parser do
   before(:each) do
     @definition = mock('definition', :sections => [])
     @file = mock("file")
-    @parser = FixedWidth::Parser.new(@definition, @file)
+    @parser = FixedWidthMultirecord::Parser.new(@definition, @file)
   end
 
   it "should read in a source file" do
@@ -14,7 +14,7 @@ describe FixedWidth::Parser do
 
   describe "when parsing sections" do
     before(:each) do
-      @definition = FixedWidth.define :test do |d|
+      @definition = FixedWidthMultirecord.define :test do |d|
         d.header do |h|
           h.trap { |line| line[0,4] == 'HEAD' }
           h.column :type, 4
@@ -31,7 +31,7 @@ describe FixedWidth::Parser do
           f.column :file_id, 10
         end
       end
-      @parser = FixedWidth::Parser.new(@definition, @file)
+      @parser = FixedWidthMultirecord::Parser.new(@definition, @file)
     end
 
     it "should add lines to the proper sections" do
@@ -55,7 +55,7 @@ describe FixedWidth::Parser do
 
     describe "multi-line records" do
       before(:each) do
-        @definition = FixedWidth.define :test do |d|
+        @definition = FixedWidthMultirecord.define :test do |d|
           d.header(:singular => true) do |h|
             h.trap { |line| line[0,4] == 'HEAD' }
             h.column :type, 4
@@ -79,7 +79,7 @@ describe FixedWidth::Parser do
             f.column :file_id, 10
           end
         end
-        @parser = FixedWidth::Parser.new(@definition, @file)
+        @parser = FixedWidthMultirecord::Parser.new(@definition, @file)
       end
 
       it "handles nested lines" do
@@ -104,7 +104,7 @@ describe FixedWidth::Parser do
     end
 
     it "should treat singular sections properly" do
-      @definition = FixedWidth.define :test do |d|
+      @definition = FixedWidthMultirecord.define :test do |d|
         d.header(:singular => true) do |h|
           h.trap { |line| line[0,4] == 'HEAD' }
           h.column :type, 4
@@ -121,7 +121,7 @@ describe FixedWidth::Parser do
           f.column :file_id, 10
         end
       end
-      @parser = FixedWidth::Parser.new(@definition, @file)
+      @parser = FixedWidthMultirecord::Parser.new(@definition, @file)
       @file.should_receive(:readlines).and_return([
         "HEAD         1\n",
         "      Paul    Hewson\n",
@@ -154,7 +154,7 @@ describe FixedWidth::Parser do
       @file.should_receive(:readlines).and_return([
         "      Ryan      Wood\n"
       ])
-      lambda { @parser.parse }.should raise_error(FixedWidth::RequiredSectionNotFoundError, "Required section 'header' was not found.")
+      lambda { @parser.parse }.should raise_error(FixedWidthMultirecord::RequiredSectionNotFoundError, "Required section 'header' was not found.")
     end
   end
 end

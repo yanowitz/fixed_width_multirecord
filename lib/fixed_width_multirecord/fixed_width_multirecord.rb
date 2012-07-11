@@ -11,7 +11,7 @@
 #
 # For examples, see examples/*.rb or the README.
 #
-class FixedWidth
+class FixedWidthMultirecord
   class ParserError < RuntimeError; end
   class DuplicateColumnNameError < StandardError; end
   class DuplicateGroupNameError < StandardError; end

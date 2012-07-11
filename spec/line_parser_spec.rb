@@ -1,8 +1,8 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe FixedWidth::LineParser do
+describe FixedWidthMultirecord::LineParser do
   before(:each) do
-    @lp = FixedWidth::LineParser.new(:name => :a_parser)
+    @lp = FixedWidthMultirecord::LineParser.new(:name => :a_parser)
   end
 
   describe "#initialize" do
@@ -39,32 +39,32 @@ describe FixedWidth::LineParser do
 
     it "should prevent duplicate column names without any groupings" do
       @lp.column :id, 10
-      lambda { @lp.column(:id, 30) }.should raise_error(FixedWidth::DuplicateColumnNameError, /column named 'id'/)
+      lambda { @lp.column(:id, 30) }.should raise_error(FixedWidthMultirecord::DuplicateColumnNameError, /column named 'id'/)
     end
 
     it "should prevent column names that already exist as groups" do
       @lp.column :foo, 11, :group => :id
-      lambda { @lp.column(:id, 30) }.should raise_error(FixedWidth::DuplicateGroupNameError, /group named 'id'/)
+      lambda { @lp.column(:id, 30) }.should raise_error(FixedWidthMultirecord::DuplicateGroupNameError, /group named 'id'/)
     end
 
     it "should prevent group names that already exist as columns" do
       @lp.column :foo, 11
-      lambda { @lp.column(:id, 30, :group => :foo) }.should raise_error(FixedWidth::DuplicateGroupNameError, /column named 'foo'/)
+      lambda { @lp.column(:id, 30, :group => :foo) }.should raise_error(FixedWidthMultirecord::DuplicateGroupNameError, /column named 'foo'/)
     end
 
     it "should prevent duplicate column names within groups" do
       @lp.column :id, 10, :group => :foo
-      lambda { @lp.column(:id, 30, :group => :foo) }.should raise_error(FixedWidth::DuplicateColumnNameError, /column named 'id' in the ':foo' group/)
+      lambda { @lp.column(:id, 30, :group => :foo) }.should raise_error(FixedWidthMultirecord::DuplicateColumnNameError, /column named 'id' in the ':foo' group/)
     end
 
     it "should allow duplicate column names in different groups" do
       @lp.column :id, 10, :group => :foo
-      lambda { @lp.column(:id, 30, :group => :bar) }.should_not raise_error(FixedWidth::DuplicateColumnNameError)
+      lambda { @lp.column(:id, 30, :group => :bar) }.should_not raise_error(FixedWidthMultirecord::DuplicateColumnNameError)
     end
 
     it "should allow duplicate column names that are reserved (i.e. spacer)" do
       @lp.spacer 10
-      lambda { @lp.spacer 10 }.should_not raise_error(FixedWidth::DuplicateColumnNameError)
+      lambda { @lp.spacer 10 }.should_not raise_error(FixedWidthMultirecord::DuplicateColumnNameError)
     end
   end
 
@@ -148,7 +148,7 @@ describe FixedWidth::LineParser do
     end
 
     it "should break columns into groups" do
-      lp = FixedWidth::LineParser.new 
+      lp = FixedWidthMultirecord::LineParser.new 
       lp.column(:id, 5)
       lp.column(:first, 10, :group => :name)
       lp.column(:last, 10, :group => :name)

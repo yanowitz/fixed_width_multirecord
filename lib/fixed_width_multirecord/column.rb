@@ -1,4 +1,4 @@
-class FixedWidth
+class FixedWidthMultirecord
   class Column
     DEFAULT_PADDING   = ' '
     DEFAULT_ALIGNMENT = :right
@@ -74,7 +74,7 @@ class FixedWidth
 
     def validate_size(result)
       return result if result.length <= @length
-      raise FixedWidth::FormattedStringExceedsLengthError.new(
+      raise FixedWidthMultirecord::FormattedStringExceedsLengthError.new(
         "The formatted value '#{result}' in column '#{@name}' exceeds the allowed length of #{@length} chararacters.") unless @truncate
       case @alignment
       when :right then result[-@length,@length]

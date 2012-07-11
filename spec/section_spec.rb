@@ -1,20 +1,20 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe FixedWidth::Section do
+describe FixedWidthMultirecord::Section do
   before(:each) do
-    @section = FixedWidth::Section.new(:body) {}
+    @section = FixedWidthMultirecord::Section.new(:body) {}
   end
 
   describe "section definitions" do
     it "initialises a line parser" do
       options = {:option1 => :value1}
-      FixedWidth::LineParser.should_receive(:new).with(options.merge(:name => :a_section_name))
-      FixedWidth::Section.new(:a_section_name, options) {}
+      FixedWidthMultirecord::LineParser.should_receive(:new).with(options.merge(:name => :a_section_name))
+      FixedWidthMultirecord::Section.new(:a_section_name, options) {}
     end
 
     it "yields the block it's passed" do
       yielded = false
-      new_section = FixedWidth::Section.new(:a_section_name) do |section|
+      new_section = FixedWidthMultirecord::Section.new(:a_section_name) do |section|
         yielded = section
       end
       yielded.should == new_section
@@ -35,8 +35,8 @@ describe FixedWidth::Section do
 
     describe "#line" do
       it "creates additional sections (with a parent relationship)" do
-        mock_section = mock(FixedWidth::Section)
-        FixedWidth::Section.should_receive(:new).with(:second_record, {:parent => @section}).and_yield(mock_section)
+        mock_section = mock(FixedWidthMultirecord::Section)
+        FixedWidthMultirecord::Section.should_receive(:new).with(:second_record, {:parent => @section}).and_yield(mock_section)
         second_record = nil
         @section.line( :second_record ) do |section|
           second_record = section
@@ -49,8 +49,8 @@ describe FixedWidth::Section do
 
   describe "#name" do
     it "builds a name based on the parent relationships" do
-      @child           = FixedWidth::Section.new(:child, :parent => @section) {} 
-      @grandchild      = FixedWidth::Section.new(:grandchild, :parent => @child) {} 
+      @child           = FixedWidthMultirecord::Section.new(:child, :parent => @section) {} 
+      @grandchild      = FixedWidthMultirecord::Section.new(:grandchild, :parent => @child) {} 
       @section.name    == "body"
       @child.name      == "body::child"
       @grandchild.name == "body::child::grandchild"
@@ -60,7 +60,7 @@ describe FixedWidth::Section do
   describe "#parse" do
     before(:each) do
       @column_content = { :id => 5, :first => 10, :last => 10, :state => 2 }
-      @section = FixedWidth::Section.new(:body, :optional => true) do |section|
+      @section = FixedWidthMultirecord::Section.new(:body, :optional => true) do |section|
         @column_content.each { |k,v| section.column(k, v) }
       end
 
@@ -88,7 +88,7 @@ describe FixedWidth::Section do
     describe "error handling" do
       it "raises an error if now rows" do
         @section.stub(:optional => nil)
-        lambda { @section.parse(:input => @input, :output => @output) }.should raise_error(FixedWidth::RequiredSectionNotFoundError)
+        lambda { @section.parse(:input => @input, :output => @output) }.should raise_error(FixedWidthMultirecord::RequiredSectionNotFoundError)
       end
 
       it "ignores empty rows if this section is optional" do
@@ -112,7 +112,7 @@ describe FixedWidth::Section do
       @section.first_line_parser.stub(:format => "first line")
       data = {:line2 => { :key1 => :value1, :key2 => :value2 }}
        
-      mock_section = mock(FixedWidth::Section, :short_name => :line2)
+      mock_section = mock(FixedWidthMultirecord::Section, :short_name => :line2)
       @section.instance_variable_set('@additional_lines', [mock_section])
       mock_section.should_receive(:format).with(data[:line2]).and_return("another line")
 

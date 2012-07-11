@@ -1,8 +1,8 @@
 require 'stringio'
 require File.join(File.dirname(__FILE__), "..", "lib", "fixed_width")
 
-# Create a FixedWidth::Defintion to describe a file format
-FixedWidth.define :simple do |d|
+# Create a FixedWidthMultirecord::Defintion to describe a file format
+FixedWidthMultirecord.define :simple do |d|
   # This is a template section that can be reused in other sections
   d.template :boundary do |t|
     t.column :record_type, 4
@@ -11,7 +11,7 @@ FixedWidth.define :simple do |d|
 
   # Create a header section
   d.header(:align => :left) do |header|
-    # The trap tells FixedWidth which lines should fall into this section
+    # The trap tells FixedWidthMultirecord which lines should fall into this section
     header.trap { |line| line[0,4] == 'HEAD' }
     # Use the boundary template for the columns
     header.template :boundary
@@ -59,12 +59,12 @@ test_data = {
 }
 
 # Generates the file as a string
-generated = FixedWidth.generate(:simple, test_data)
+generated = FixedWidthMultirecord.generate(:simple, test_data)
 
 sio = StringIO.new
 sio.write(generated)
 sio.rewind
 
-parsed = FixedWidth.parse(sio, :simple)
+parsed = FixedWidthMultirecord.parse(sio, :simple)
 
 puts parsed == test_data

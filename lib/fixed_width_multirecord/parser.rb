@@ -1,4 +1,4 @@
-class FixedWidth
+class FixedWidthMultirecord
   class Parser
     def initialize(definition, file)
       @definition = definition

@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe FixedWidth do
+describe FixedWidthMultirecord do
 
   before(:each) do
     @name = :doc
@@ -13,46 +13,46 @@ describe FixedWidth do
     end
 
     it "should create a new definition using the specified name and options" do
-      FixedWidth.should_receive(:define).with(@name, @options).and_return(@definition)
-      FixedWidth.define(@name , @options)
+      FixedWidthMultirecord.should_receive(:define).with(@name, @options).and_return(@definition)
+      FixedWidthMultirecord.define(@name , @options)
     end
 
     it "should pass the definition to the block" do
       yielded = nil
-      FixedWidth.define(@name) do |y|
+      FixedWidthMultirecord.define(@name) do |y|
         yielded = y
       end
-      yielded.should be_a( FixedWidth::Definition )
+      yielded.should be_a( FixedWidthMultirecord::Definition )
     end
 
     it "should add to the internal definition count" do
-      FixedWidth.definitions.clear
-      FixedWidth.should have(0).definitions
-      FixedWidth.define(@name , @options) {}
-      FixedWidth.should have(1).definitions
+      FixedWidthMultirecord.definitions.clear
+      FixedWidthMultirecord.should have(0).definitions
+      FixedWidthMultirecord.define(@name , @options) {}
+      FixedWidthMultirecord.should have(1).definitions
     end
   end
 
   describe "when creating file from data" do 
     it "should raise an error if the definition name is not found" do
-      lambda { FixedWidth.generate(:not_there, {}) }.should raise_error(ArgumentError)
+      lambda { FixedWidthMultirecord.generate(:not_there, {}) }.should raise_error(ArgumentError)
     end
 
     it "should output a string" do
       definition = mock('definition')
       generator = mock('generator')
       generator.should_receive(:generate).with({})
-      FixedWidth.should_receive(:definition).with(:test).and_return(definition)
-      FixedWidth::Generator.should_receive(:new).with(definition,"\n").and_return(generator)
-      FixedWidth.generate(:test, {})
+      FixedWidthMultirecord.should_receive(:definition).with(:test).and_return(definition)
+      FixedWidthMultirecord::Generator.should_receive(:new).with(definition,"\n").and_return(generator)
+      FixedWidthMultirecord.generate(:test, {})
     end
 
     it "should output a file" do
       file = mock('file')
       text = mock('string')
       file.should_receive(:write).with(text)
-      FixedWidth.should_receive(:generate).with(:test, {}).and_return(text)
-      FixedWidth.write(file, :test, {})
+      FixedWidthMultirecord.should_receive(:generate).with(:test, {}).and_return(text)
+      FixedWidthMultirecord.write(file, :test, {})
     end
   end
 
@@ -62,20 +62,20 @@ describe FixedWidth do
     end
 
     it "should check the file exists" do
-      lambda { FixedWidth.parse(@file, :test, {}) }.should raise_error(ArgumentError)
+      lambda { FixedWidthMultirecord.parse(@file, :test, {}) }.should raise_error(ArgumentError)
     end
 
     it "should raise an error if the definition name is not found" do
-      FixedWidth.definitions.clear
-      lambda { FixedWidth.parse(@file, :test, {}) }.should raise_error(ArgumentError)
+      FixedWidthMultirecord.definitions.clear
+      lambda { FixedWidthMultirecord.parse(@file, :test, {}) }.should raise_error(ArgumentError)
     end
 
     it "should create a parser and call parse" do
       parser = mock("parser").as_null_object
       definition = mock('definition')
-      FixedWidth.should_receive(:definition).with(:test).and_return(definition)
-      FixedWidth::Parser.should_receive(:new).with(definition, @file).and_return(parser)
-      FixedWidth.parse(@file, :test)
+      FixedWidthMultirecord.should_receive(:definition).with(:test).and_return(definition)
+      FixedWidthMultirecord::Parser.should_receive(:new).with(definition, @file).and_return(parser)
+      FixedWidthMultirecord.parse(@file, :test)
     end
   end
 end

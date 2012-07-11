@@ -1,4 +1,4 @@
-class FixedWidth
+class FixedWidthMultirecord
   class Generator
     attr_accessor :record_separator
     def initialize(definition,separator = "\n")
@@ -11,7 +11,7 @@ class FixedWidth
       @definition.sections.each do |section|
         content = data[section.name]
         arrayed_content = content.is_a?(Array) ? content : [content]
-        raise FixedWidth::RequiredSectionEmptyError.new("Required section '#{section.name}' was empty.") if (content.nil? || content.empty?) && !section.optional
+        raise FixedWidthMultirecord::RequiredSectionEmptyError.new("Required section '#{section.name}' was empty.") if (content.nil? || content.empty?) && !section.optional
         arrayed_content.each {|row| @builder << section.format(row) }
       end
       @builder << "" # so we get a final record separator

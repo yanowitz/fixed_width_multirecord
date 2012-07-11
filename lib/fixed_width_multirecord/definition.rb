@@ -1,4 +1,4 @@
-class FixedWidth
+class FixedWidthMultirecord
   class Definition
     attr_reader :sections, :templates, :options
 
@@ -12,12 +12,12 @@ class FixedWidth
     def section(name, options={}, &block)
       raise DuplicateSectionNameError.new("Duplicate section name: '#{name}'") if @sections.detect{|s| s.name == name }
 
-      section = FixedWidth::Section.new(name, @options.merge(options), &block)
+      section = FixedWidthMultirecord::Section.new(name, @options.merge(options), &block)
       @sections << section
     end
 
     def template(name, options={}, &block)
-      section = FixedWidth::Section.new(name, @options.merge(options), &block)
+      section = FixedWidthMultirecord::Section.new(name, @options.merge(options), &block)
       @templates[name] = section
     end
 

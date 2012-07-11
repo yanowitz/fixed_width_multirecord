@@ -1,8 +1,8 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe FixedWidth::Generator do
+describe FixedWidthMultirecord::Generator do
   before(:each) do
-    @definition = FixedWidth.define :test do |d|
+    @definition = FixedWidthMultirecord.define :test do |d|
       d.header do |h|
         h.trap { |line| line[0,4] == 'HEAD' }
         h.column :type, 4
@@ -27,12 +27,12 @@ describe FixedWidth::Generator do
       ],
       :footer => [ {:type => "FOOT", :file_id => "1" }]
     }
-    @generator = FixedWidth::Generator.new(@definition)
+    @generator = FixedWidthMultirecord::Generator.new(@definition)
   end
 
   it "should raise an error if there is no data for a required section" do
     @data.delete :header
-    lambda {  @generator.generate(@data) }.should raise_error(FixedWidth::RequiredSectionEmptyError, "Required section 'header' was empty.")
+    lambda {  @generator.generate(@data) }.should raise_error(FixedWidthMultirecord::RequiredSectionEmptyError, "Required section 'header' was empty.")
   end
 
   it "should generate a string" do
@@ -48,7 +48,7 @@ describe FixedWidth::Generator do
 
   describe "multi-line records" do
     before(:each) do
-      @definition = FixedWidth.define :test do |d|
+      @definition = FixedWidthMultirecord.define :test do |d|
         d.header(:singular => true) do |h|
           h.trap { |line| line[0,4] == 'HEAD' }
           h.column :type, 4
@@ -72,7 +72,7 @@ describe FixedWidth::Generator do
           f.column :file_id, 10
         end
       end
-      @generator = FixedWidth::Generator.new(@definition)
+      @generator = FixedWidthMultirecord::Generator.new(@definition)
     end
 
     it "handles multi-line records" do

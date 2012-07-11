@@ -1,4 +1,4 @@
-class FixedWidth
+class FixedWidthMultirecord
   class Section
     attr_accessor :definition, :optional, :singular
     attr_reader :options, :first_line_parser, :additional_lines
@@ -19,7 +19,7 @@ class FixedWidth
       @parent      = options[:parent]
       @definition  = options[:definition]
 
-      @first_line_parser = FixedWidth::LineParser.new(options.merge(:name => @name))
+      @first_line_parser = FixedWidthMultirecord::LineParser.new(options.merge(:name => @name))
 
       @additional_lines = []
 
@@ -65,7 +65,7 @@ class FixedWidth
       end
 
       if !self.optional && (!output[@name] || output[@name].empty?)
-        raise FixedWidth::RequiredSectionNotFoundError.new("Required section '#{name}' was not found.")
+        raise FixedWidthMultirecord::RequiredSectionNotFoundError.new("Required section '#{name}' was not found.")
       end
     end
 
