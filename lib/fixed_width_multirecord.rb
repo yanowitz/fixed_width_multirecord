@@ -1,0 +1,10 @@
+$: << File.dirname(__FILE__)
+require 'ostruct'
+require 'fixed_width_multirecord/core_ext/symbol'
+require 'fixed_width_multirecord/fixed_width_multirecord'
+require 'fixed_width_multirecord/definition'
+require 'fixed_width_multirecord/section'
+require 'fixed_width_multirecord/line_parser'
+require 'fixed_width_multirecord/column'
+require 'fixed_width_multirecord/parser'
+require 'fixed_width_multirecord/generator'
