@@ -12,7 +12,7 @@ end
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gemspec|
-    gemspec.name = "fixed_width"
+    gemspec.name = "fixed_width_multirecord"
     gemspec.summary = "A gem that provides a DSL for parsing and writing files of fixed-width records."
     gemspec.description = <<END
 A gem that provides a DSL for parsing and writing files of fixed-width records.
@@ -20,10 +20,12 @@ A gem that provides a DSL for parsing and writing files of fixed-width records.
 Shamelessly forked from ryanwood/slither [http://github.com/ryanwood/slither].
 
 Renamed the gem to be a little clearer as to its purpose. Hate that 'nokogiri' nonsense.
+
+Reshamelessly forked from Timon's version to add multi-line record support
 END
-    gemspec.email = "timon.karnezos@gmail.com"
-    gemspec.homepage = "http://github.com/timonk/fixed_width"
-    gemspec.authors = ["Timon Karnezos"]
+    gemspec.email = "jyanowitz@groupon.com"
+    gemspec.homepage = "http://github.com/yanowitz/fixed_width_multirecord"
+    gemspec.authors = ["Jason Yanowitz", "Timon Karnezos", "Ryan Wood"]
   end
 rescue LoadError
   warn "Jeweler not available. Install it with:"
